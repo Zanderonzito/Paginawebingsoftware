@@ -704,6 +704,7 @@ let PEDIDOS = [];
 document.getElementById('login-pass').addEventListener('keydown', e => {
   if (e.key === 'Enter') iniciarSesion();
 });
+document.getElementById('btn-login').addEventListener('click', iniciarSesion);
 
 async function iniciarSesion() {
   const email = document.getElementById('login-email').value.trim();
