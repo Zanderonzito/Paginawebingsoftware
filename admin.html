@@ -245,6 +245,59 @@
       .ipc-grid { grid-template-columns:1fr; }
       .form-grid { grid-template-columns:1fr; }
     }
+
+    /* ── Página de Inicio CMS ── */
+    .inicio-row {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:14px 18px; background:var(--petrol-mid); border:1px solid var(--border);
+      margin-bottom:4px; gap:16px; transition:border-color 0.2s;
+    }
+    .inicio-row:hover { border-color:var(--border-hover); }
+    .inicio-row-info { display:flex; align-items:center; gap:12px; min-width:0; }
+    .inicio-row-name { font-size:0.88rem; color:var(--ivory); white-space:nowrap; }
+    .inicio-row-acciones { display:flex; align-items:center; gap:6px; flex-shrink:0; flex-wrap:wrap; }
+    .btn-orden {
+      width:28px; height:28px; background:transparent; border:1px solid var(--border);
+      color:var(--ivory-dim); cursor:pointer; font-size:0.9rem;
+      transition:all 0.2s; font-family:var(--font-body); padding:0; line-height:1;
+    }
+    .btn-orden:hover:not(:disabled) { border-color:var(--copper); color:var(--copper); }
+    .btn-orden:disabled { opacity:0.25; cursor:not-allowed; }
+    .btn-toggle {
+      padding:5px 11px; font-size:0.7rem; letter-spacing:0.1em; cursor:pointer;
+      font-family:var(--font-body); transition:all 0.2s; background:transparent;
+    }
+    .btn-toggle-on  { border:1px solid rgba(39,174,96,0.5);  color:#2ecc71; }
+    .btn-toggle-off { border:1px solid rgba(192,57,43,0.4);  color:rgba(231,76,60,0.85); }
+    .btn-toggle-on:hover  { background:rgba(39,174,96,0.12); }
+    .btn-toggle-off:hover { background:rgba(192,57,43,0.1); }
+    .form-section-title {
+      font-size:0.65rem; letter-spacing:0.22em; text-transform:uppercase;
+      color:var(--copper); border-bottom:1px solid var(--border);
+      padding-bottom:7px; margin-top:6px; grid-column:1/-1;
+    }
+    .form-pillar {
+      background:var(--petrol); border:1px solid var(--border);
+      padding:14px 16px; margin-bottom:6px;
+    }
+    .form-pillar-label {
+      font-size:0.62rem; letter-spacing:0.2em; text-transform:uppercase;
+      color:var(--copper-bright); margin-bottom:12px; display:block;
+    }
+    .fi-input {
+      width:100%; background:var(--petrol); border:1px solid var(--border);
+      color:var(--ivory); padding:9px 10px; font-family:var(--font-body);
+      font-size:0.84rem; outline:none; transition:border-color 0.3s;
+    }
+    .fi-input:focus { border-color:var(--copper); }
+    .fi-label { font-size:0.6rem; letter-spacing:0.16em; text-transform:uppercase; color:var(--copper); display:block; margin-bottom:4px; }
+    .fi-group { margin-bottom:4px; }
+    .fi-row-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:6px; }
+    .fi-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:6px; }
+    @media (max-width:768px) {
+      .inicio-row { flex-direction:column; align-items:flex-start; }
+      .fi-row-3, .fi-row-2 { grid-template-columns:1fr; }
+    }
   </style>
 </head>
 <body>
@@ -292,6 +345,12 @@
         </div>
         <div class="nav-item" onclick="irA('monetario')">
           <span class="nav-icon">📈</span> Corrección Monetaria
+        </div>
+        <div class="nav-item" onclick="irA('inicio')">
+          <span class="nav-icon">🏠</span> Página de Inicio
+        </div>
+        <div class="nav-item" onclick="irA('estadisticas')">
+          <span class="nav-icon">📊</span> Estadísticas de Ventas
         </div>
       </nav>
       <div class="sidebar-footer">
@@ -345,7 +404,7 @@
             <thead>
               <tr>
                 <th>Foto</th><th>Nombre</th><th>Categoría</th>
-                <th>Precio CLP</th><th>Stock</th><th>Estado</th><th>Acciones</th>
+                <th>Precio CLP</th><th>Stock</th><th>Estado</th><th>Tendencia</th><th>Acciones</th>
               </tr>
             </thead>
             <tbody id="tabla-productos"><tr><td colspan="7" style="color:var(--ivory-dim);text-align:center;padding:20px;">Cargando…</td></tr></tbody>
@@ -464,7 +523,45 @@
         </div>
       </div>
 
+      <!-- PÁGINA DE INICIO -->
+      <div class="section" id="sec-inicio">
+        <div class="page-title">Página de <em>Inicio</em></div>
+        <div class="page-sub">Edita, reordena y activa las secciones de mujercobra.cl · Los cambios se reflejan al recargar la página</div>
+        <div class="table-header">
+          <h3>Secciones del sitio</h3>
+          <button class="btn-add" onclick="abrirAgregarInicio()">+ Agregar sección</button>
+        </div>
+        <div id="lista-inicio">
+          <p style="color:var(--ivory-dim);text-align:center;padding:30px;">Cargando…</p>
+        </div>
+      </div>
+
+      <!-- ESTADÍSTICAS DE VENTAS -->
+      <div class="section" id="sec-estadisticas">
+        <div class="page-title">Estadísticas de <em>Ventas</em></div>
+        <div class="page-sub">Productos más vendidos según los pedidos registrados</div>
+        <div id="stats-contenido">
+          <p style="color:var(--ivory-dim);text-align:center;padding:30px;">Cargando estadísticas…</p>
+        </div>
+      </div>
+
     </main>
+  </div>
+</div>
+
+<!-- ── MODAL INICIO ───────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-inicio">
+  <div class="modal-box" style="max-width:700px;">
+    <button class="modal-close" onclick="cerrarModalInicio()">✕</button>
+    <div class="modal-title" id="modal-inicio-titulo">Editar sección</div>
+    <div id="modal-inicio-form" style="margin-top:4px;">
+      <!-- Formulario generado dinámicamente según el tipo de sección -->
+    </div>
+    <div id="modal-inicio-error" style="color:#e74c3c;font-size:0.8rem;margin-top:12px;display:none;"></div>
+    <div class="form-actions">
+      <button class="btn-cancel" onclick="cerrarModalInicio()">Cancelar</button>
+      <button class="btn-primary" style="max-width:180px;" id="btn-guardar-inicio" onclick="guardarInicio()">Guardar cambios</button>
+    </div>
   </div>
 </div>
 
@@ -650,7 +747,7 @@ function irA(seccion) {
 
 /* ── CARGA INICIAL ── */
 async function cargarTodo() {
-  await Promise.all([cargarCategorias(), cargarProductos(), cargarPedidos()]);
+  await Promise.all([cargarCategorias(), cargarProductos(), cargarPedidos(), cargarInicio(), cargarEstadisticas()]);
   actualizarStats();
   renderTablaCategorias();
   calcularIPC();
@@ -695,7 +792,7 @@ function actualizarStats() {
 function renderTablaProductos() {
   const tbody = document.getElementById('tabla-productos');
   if (PRODUCTOS.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="color:var(--ivory-dim);text-align:center;padding:20px;">Sin productos aún</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="color:var(--ivory-dim);text-align:center;padding:20px;">Sin productos aún</td></tr>';
     return;
   }
   tbody.innerHTML = PRODUCTOS.map(p => {
@@ -706,6 +803,9 @@ function renderTablaProductos() {
     const estado = p.disponible
       ? '<span class="badge badge-on">Activo</span>'
       : '<span class="badge badge-off">Oculto</span>';
+    const tendenciaBadge = p.tendencia
+      ? `<span class="badge badge-on" onclick="toggleTendencia(${p.id},false)" style="cursor:pointer;user-select:none;" title="Quitar de tendencias">Sí</span>`
+      : `<span class="badge badge-off" onclick="toggleTendencia(${p.id},true)" style="cursor:pointer;user-select:none;" title="Marcar como tendencia">No</span>`;
     return `<tr>
       <td>${imgHtml}</td>
       <td style="max-width:200px;">${p.nombre_es}</td>
@@ -713,6 +813,7 @@ function renderTablaProductos() {
       <td>$${Number(p.precio_clp).toLocaleString('es-CL')}</td>
       <td>${p.stock}</td>
       <td>${estado}</td>
+      <td>${tendenciaBadge}</td>
       <td>
         <button class="btn-edit" onclick="editarProducto(${p.id})">Editar</button>
         <button class="btn-delete" onclick="eliminarProducto(${p.id})">Eliminar</button>
@@ -764,6 +865,75 @@ function renderPedidosResumen() {
     <td>$${Number(p.total).toLocaleString('es-CL')}</td>
     <td><span class="estado-badge estado-${p.estado}">${p.estado}</span></td>
   </tr>`).join('');
+}
+
+/* ── ESTADÍSTICAS DE VENTAS ── */
+async function cargarEstadisticas() {
+  const contenido = document.getElementById('stats-contenido');
+  if (!contenido) return;
+
+  try {
+    const { data: pedidos, error } = await supabaseClient
+      .from('pedidos')
+      .select('items');
+
+    if (error) throw error;
+
+    if (!pedidos || pedidos.length === 0) {
+      contenido.innerHTML = '<p style="color:var(--ivory-dim);text-align:center;padding:30px;">Aún no hay pedidos registrados</p>';
+      return;
+    }
+
+    // Acumular unidades y total por producto_id
+    const mapa = {};
+    pedidos.forEach(pedido => {
+      const items = pedido.items;
+      if (!Array.isArray(items)) return;
+      items.forEach(item => {
+        const pid    = String(item.producto_id || item.id || '?');
+        const nombre = item.nombre_es || item.nombre || item.name || pid;
+        const qty    = Number(item.cantidad || item.qty || item.quantity || 1);
+        const precio = Number(item.precio_clp || item.precio || item.price || 0);
+        if (!mapa[pid]) mapa[pid] = { nombre, unidades: 0, total: 0 };
+        mapa[pid].unidades += qty;
+        mapa[pid].total    += qty * precio;
+      });
+    });
+
+    const ranking = Object.values(mapa)
+      .sort((a, b) => b.unidades - a.unidades)
+      .slice(0, 10);
+
+    if (ranking.length === 0) {
+      contenido.innerHTML = '<p style="color:var(--ivory-dim);text-align:center;padding:30px;">Aún no hay pedidos registrados</p>';
+      return;
+    }
+
+    contenido.innerHTML = `
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Pos.</th>
+              <th>Producto</th>
+              <th>Unidades vendidas</th>
+              <th>Total CLP generado</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${ranking.map((p, i) => `<tr>
+              <td style="font-family:var(--font-display);font-size:1.2rem;color:var(--copper-bright);text-align:center;">${i + 1}</td>
+              <td>${p.nombre}</td>
+              <td style="font-family:var(--font-display);font-size:1.1rem;color:var(--copper-bright);text-align:center;">${p.unidades}</td>
+              <td>$${Math.round(p.total).toLocaleString('es-CL')}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+
+  } catch (e) {
+    contenido.innerHTML = '<p style="color:#e74c3c;text-align:center;padding:30px;">Error al cargar estadísticas</p>';
+  }
 }
 
 /* ── CAMBIAR ESTADO PEDIDO ── */
@@ -883,6 +1053,14 @@ async function eliminarProducto(id) {
   await cargarProductos();
   actualizarStats();
   mostrarToast('Producto eliminado');
+}
+
+async function toggleTendencia(id, nuevoEstado) {
+  const { error } = await supabaseClient
+    .from('productos').update({ tendencia: nuevoEstado }).eq('id', id);
+  if (error) { mostrarToast('Error al actualizar'); return; }
+  await cargarProductos();
+  mostrarToast(nuevoEstado ? 'Marcado como tendencia ✓' : 'Quitado de tendencias');
 }
 
 /* ── SUBIDA DE FOTO ── */
@@ -1138,10 +1316,469 @@ function mostrarToast(msg) {
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-/* ── Cerrar modal con Escape ── */
+/* ── Cerrar modales con Escape ── */
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') cerrarModal();
+  if (e.key === 'Escape') { cerrarModal(); cerrarModalInicio(); }
 });
+
+/* ══════════════════════════════════════════════════════════════
+   INICIO — Gestión de contenido_inicio
+══════════════════════════════════════════════════════════════ */
+
+var CONTENIDO_INICIO = [];
+var _inicioEditId    = null;
+
+/* ── Cargar (autenticado ve todas las filas, incluso inactivas) ── */
+async function cargarInicio() {
+  const { data } = await supabaseClient
+    .from('contenido_inicio').select('*').order('orden');
+  CONTENIDO_INICIO = data || [];
+  renderListaInicio();
+}
+
+/* ── Render lista de secciones ── */
+function renderListaInicio() {
+  const lista = document.getElementById('lista-inicio');
+  if (!lista) return;
+  if (CONTENIDO_INICIO.length === 0) {
+    lista.innerHTML = '<p style="color:var(--ivory-dim);text-align:center;padding:30px;">Sin secciones. Usa "Agregar sección".</p>';
+    return;
+  }
+  const NOMBRES = {
+    hero:'🏠 Hero', productos:'🪙 Productos',
+    split1:'📸 Sección 1 (texto izq, foto der)', split2:'📸 Sección 2 (foto izq, texto der)',
+    contacto:'✉ Contacto', footer:'⬛ Footer'
+  };
+  const n = CONTENIDO_INICIO.length;
+  lista.innerHTML = CONTENIDO_INICIO.map((row, idx) => `
+    <div class="inicio-row">
+      <div class="inicio-row-info">
+        <span class="inicio-row-name">${NOMBRES[row.seccion] || row.seccion}</span>
+        <span class="badge ${row.activa ? 'badge-on' : 'badge-off'}">${row.activa ? 'Activa' : 'Inactiva'}</span>
+      </div>
+      <div class="inicio-row-acciones">
+        <button class="btn-orden" title="Subir"  onclick="moverInicio(${row.id},'up')"   ${idx === 0     ? 'disabled' : ''}>↑</button>
+        <button class="btn-orden" title="Bajar"  onclick="moverInicio(${row.id},'down')" ${idx === n - 1 ? 'disabled' : ''}>↓</button>
+        <button class="btn-toggle ${row.activa ? 'btn-toggle-on' : 'btn-toggle-off'}"
+                onclick="toggleInicio(${row.id},${!row.activa})">
+          ${row.activa ? 'Desactivar' : 'Activar'}
+        </button>
+        <button class="btn-edit"   onclick="editarInicio(${row.id})">Editar</button>
+        <button class="btn-delete" onclick="eliminarInicio(${row.id})">Eliminar</button>
+      </div>
+    </div>`).join('');
+}
+
+/* ── Toggle activa/inactiva ── */
+async function toggleInicio(id, nuevoEstado) {
+  const { error } = await supabaseClient
+    .from('contenido_inicio').update({ activa: nuevoEstado }).eq('id', id);
+  if (error) { mostrarToast('Error al actualizar'); return; }
+  await cargarInicio();
+  mostrarToast(nuevoEstado ? 'Sección activada' : 'Sección desactivada');
+}
+
+/* ── Subir / bajar (swap de orden) ── */
+async function moverInicio(id, dir) {
+  const idx = CONTENIDO_INICIO.findIndex(r => r.id === id);
+  if (idx < 0) return;
+  const oIdx = dir === 'up' ? idx - 1 : idx + 1;
+  if (oIdx < 0 || oIdx >= CONTENIDO_INICIO.length) return;
+  const a = CONTENIDO_INICIO[idx];
+  const b = CONTENIDO_INICIO[oIdx];
+  await Promise.all([
+    supabaseClient.from('contenido_inicio').update({ orden: b.orden }).eq('id', a.id),
+    supabaseClient.from('contenido_inicio').update({ orden: a.orden }).eq('id', b.id),
+  ]);
+  await cargarInicio();
+}
+
+/* ── Abrir modal editar ── */
+function editarInicio(id) {
+  const row = CONTENIDO_INICIO.find(r => r.id === id);
+  if (!row) return;
+  _inicioEditId = id;
+  const tipo = (row.datos && row.datos._tipo) || row.seccion;
+  document.getElementById('modal-inicio-titulo').textContent = 'Editar — ' + row.seccion;
+  document.getElementById('modal-inicio-error').style.display = 'none';
+  document.getElementById('modal-inicio-form').innerHTML = buildFormInicio(tipo, row.datos || {});
+  document.getElementById('modal-inicio').classList.add('open');
+}
+
+/* ── Abrir modal agregar ── */
+function abrirAgregarInicio() {
+  _inicioEditId = null;
+  document.getElementById('modal-inicio-titulo').textContent = 'Nueva sección';
+  document.getElementById('modal-inicio-error').style.display = 'none';
+  const tipos = ['hero','philosophy','productos','legado','sustenta','contacto','footer'];
+  document.getElementById('modal-inicio-form').innerHTML = `
+    <div class="form-grid">
+      <div class="form-field full">
+        <label>Tipo de sección *</label>
+        <select id="fi-tipo-nuevo" onchange="cambiarTipoNuevo(this.value)">
+          <option value="">— seleccionar —</option>
+          ${tipos.map(t => `<option value="${t}">${t}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-field full">
+        <label>Nombre interno (identificador en BD)</label>
+        <input type="text" id="fi-seccion-nombre" placeholder="Se rellena automáticamente">
+      </div>
+    </div>
+    <div id="fi-nueva-campos"></div>`;
+  document.getElementById('modal-inicio').classList.add('open');
+}
+
+function cambiarTipoNuevo(tipo) {
+  const el = document.getElementById('fi-nueva-campos');
+  if (!el) return;
+  if (!tipo) { el.innerHTML = ''; return; }
+  const nombreEl = document.getElementById('fi-seccion-nombre');
+  if (nombreEl && !nombreEl.value) nombreEl.value = tipo;
+  el.innerHTML = buildFormInicio(tipo, {});
+}
+
+/* ── Cerrar modal ── */
+function cerrarModalInicio() {
+  document.getElementById('modal-inicio').classList.remove('open');
+}
+
+/* ══ BUILDERS DE FORMULARIO ══ */
+
+function buildFormInicio(seccion, d) {
+  switch (seccion) {
+    case 'hero':       return buildFormHero(d);
+    case 'philosophy': return buildFormPhilosophy(d);
+    case 'productos':  return buildFormProductos(d);
+    case 'legado':     return buildFormLegado(d);
+    case 'sustenta':   return buildFormSustenta(d);
+    case 'split1':
+    case 'split2':     return buildFormSplit(d);
+    case 'contacto':   return buildFormContacto(d);
+    case 'footer':     return buildFormFooter(d);
+    default:
+      return `<div class="form-field full" style="margin-top:12px;">
+        <label>Datos JSON (edición avanzada)</label>
+        <textarea id="fi-raw-json" style="min-height:180px;font-family:monospace;font-size:0.8rem;">${escForm(JSON.stringify(d, null, 2))}</textarea>
+      </div>`;
+  }
+}
+
+// Helpers
+function fi(id, label, val, full, textarea) {
+  const cls = full ? ' full' : '';
+  if (textarea) return `<div class="form-field${cls}"><label>${label}</label><textarea id="${id}" style="min-height:72px;">${escForm(val)}</textarea></div>`;
+  return `<div class="form-field${cls}"><label>${label}</label><input type="text" id="${id}" value="${escForm(val)}"></div>`;
+}
+function secT(t) { return `<div class="form-section-title">${t}</div>`; }
+function escForm(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function fiRow(fields) {
+  const cols = fields.length === 3 ? 'fi-row-3' : 'fi-row-2';
+  return `<div class="${cols}">${fields.map(([id, lbl, val]) =>
+    `<div class="fi-group"><span class="fi-label">${lbl}</span><input class="fi-input" id="${id}" type="text" value="${escForm(val)}"></div>`
+  ).join('')}</div>`;
+}
+function fiRowTa(fields) {
+  return `<div class="fi-row-2">${fields.map(([id, lbl, val]) =>
+    `<div class="fi-group"><span class="fi-label">${lbl}</span><textarea class="fi-input" id="${id}" style="min-height:68px;">${escForm(val)}</textarea></div>`
+  ).join('')}</div>`;
+}
+
+/* HERO */
+function buildFormHero(d) {
+  return `<div class="form-grid">
+    ${secT('Tagline')}
+    ${fi('fi-tagline-es','Tagline ES',d.tagline_es)}
+    ${fi('fi-tagline-en','Tagline EN',d.tagline_en)}
+    ${secT('Botón CTA')}
+    ${fi('fi-cta-texto-es','Texto botón ES',d.cta_texto_es)}
+    ${fi('fi-cta-texto-en','Texto botón EN',d.cta_texto_en)}
+    ${fi('fi-cta-url','URL del botón',d.cta_url,true)}
+  </div>`;
+}
+
+/* PHILOSOPHY */
+function buildFormPhilosophy(d) {
+  const pilares = d.pilares || [{},{},{}];
+  const nomPilar = ['Pilar 1 — Patrimonio','Pilar 2 — Fuerza','Pilar 3 — Sustentabilidad'];
+  let html = `<div class="form-grid">
+    ${secT('Encabezado')}
+    ${fi('fi-eyebrow-es','Eyebrow ES',d.eyebrow_es)}
+    ${fi('fi-eyebrow-en','Eyebrow EN',d.eyebrow_en)}
+    ${fi('fi-titulo-es','Título ES (acepta &lt;em&gt;)',d.titulo_es,true)}
+    ${fi('fi-titulo-en','Título EN (acepta &lt;em&gt;)',d.titulo_en,true)}
+  </div>`;
+  [0,1,2].forEach(i => {
+    const p = pilares[i] || {};
+    html += `<div class="form-pillar">
+      <span class="form-pillar-label">${nomPilar[i]}</span>
+      ${fiRow([[`fi-pilar${i}-titulo-es`,'Título ES',p.titulo_es],[`fi-pilar${i}-titulo-en`,'Título EN',p.titulo_en]])}
+      ${fiRowTa([[`fi-pilar${i}-texto-es`,'Texto ES',p.texto_es],[`fi-pilar${i}-texto-en`,'Texto EN',p.texto_en]])}
+    </div>`;
+  });
+  return html;
+}
+
+/* PRODUCTOS */
+function buildFormProductos(d) {
+  return `<div class="form-grid">
+    ${fi('fi-eyebrow-es','Eyebrow ES',d.eyebrow_es)}
+    ${fi('fi-eyebrow-en','Eyebrow EN',d.eyebrow_en)}
+    ${fi('fi-titulo-es','Título ES (acepta &lt;em&gt;)',d.titulo_es,true)}
+    ${fi('fi-titulo-en','Título EN (acepta &lt;em&gt;)',d.titulo_en,true)}
+  </div>`;
+}
+
+/* LEGADO */
+function buildFormLegado(d) {
+  return `<div class="form-grid">
+    ${secT('Encabezado')}
+    ${fi('fi-eyebrow-es','Eyebrow ES',d.eyebrow_es)}
+    ${fi('fi-eyebrow-en','Eyebrow EN',d.eyebrow_en)}
+    ${fi('fi-titulo-es','Título ES (acepta &lt;em&gt;)',d.titulo_es,true)}
+    ${fi('fi-titulo-en','Título EN (acepta &lt;em&gt;)',d.titulo_en,true)}
+    ${secT('Párrafos')}
+    ${fi('fi-p1-es','Párrafo 1 ES',d.p1_es,true,true)}
+    ${fi('fi-p1-en','Párrafo 1 EN',d.p1_en,true,true)}
+    ${fi('fi-p2-es','Párrafo 2 ES',d.p2_es,true,true)}
+    ${fi('fi-p2-en','Párrafo 2 EN',d.p2_en,true,true)}
+    ${secT('Cita')}
+    ${fi('fi-cita-es','Cita ES',d.cita_es,true,true)}
+    ${fi('fi-cita-en','Cita EN',d.cita_en,true,true)}
+    ${secT('Fundadora')}
+    ${fi('fi-fundadora','Nombre (aparece en visual)',d.fundadora,true)}
+  </div>`;
+}
+
+/* SUSTENTA */
+function buildFormSustenta(d) {
+  const stats = d.stats || [{},{},{}];
+  let html = `<div class="form-grid">
+    ${secT('Encabezado')}
+    ${fi('fi-eyebrow-es','Eyebrow ES',d.eyebrow_es)}
+    ${fi('fi-eyebrow-en','Eyebrow EN',d.eyebrow_en)}
+    ${fi('fi-titulo-es','Título ES (acepta &lt;em&gt;)',d.titulo_es,true)}
+    ${fi('fi-titulo-en','Título EN (acepta &lt;em&gt;)',d.titulo_en,true)}
+    ${fi('fi-texto-es','Descripción ES',d.texto_es,true,true)}
+    ${fi('fi-texto-en','Descripción EN',d.texto_en,true,true)}
+    ${secT('Estadísticas')}
+  </div>`;
+  [0,1,2].forEach(i => {
+    const s = stats[i] || {};
+    html += `<div class="form-pillar">
+      <span class="form-pillar-label">Stat ${i+1}</span>
+      ${fiRow([[`fi-stat${i}-numero`,'Número',s.numero],[`fi-stat${i}-label-es`,'Etiqueta ES',s.label_es],[`fi-stat${i}-label-en`,'Etiqueta EN',s.label_en]])}
+    </div>`;
+  });
+  return html;
+}
+
+/* CONTACTO */
+function buildFormContacto(d) {
+  return `<div class="form-grid">
+    ${secT('Encabezado')}
+    ${fi('fi-eyebrow-es','Eyebrow ES',d.eyebrow_es)}
+    ${fi('fi-eyebrow-en','Eyebrow EN',d.eyebrow_en)}
+    ${fi('fi-titulo-es','Título ES (acepta &lt;em&gt;)',d.titulo_es,true)}
+    ${fi('fi-titulo-en','Título EN (acepta &lt;em&gt;)',d.titulo_en,true)}
+    ${fi('fi-texto-es','Párrafo ES',d.texto_es,true,true)}
+    ${fi('fi-texto-en','Párrafo EN',d.texto_en,true,true)}
+    ${fi('fi-cta-es','Texto botón ES',d.cta_es)}
+    ${fi('fi-cta-en','Texto botón EN',d.cta_en)}
+    ${secT('Canales de contacto')}
+    ${fi('fi-correo','Correo electrónico',d.correo,true)}
+    ${fi('fi-instagram-handle','Instagram @handle',d.instagram_handle)}
+    ${fi('fi-instagram-url','Instagram URL',d.instagram_url)}
+    ${fi('fi-whatsapp-numero','WhatsApp número',d.whatsapp_numero)}
+    ${fi('fi-whatsapp-url','WhatsApp URL (wa.me/…)',d.whatsapp_url)}
+    ${fi('fi-atelier','Atelier / Dirección',d.atelier,true)}
+  </div>`;
+}
+
+/* FOOTER */
+function buildFormFooter(d) {
+  const social = d.social      || [{label:'IG',url:''},{label:'WA',url:''},{label:'✉',url:''}];
+  const cols   = d.colecciones || [{},{},{}];
+  const info   = d.informacion || [{},{},{},{}];
+  const legal  = d.legal       || [{},{},{}];
+
+  let html = `<div class="form-grid">
+    ${secT('Tagline & Copyright')}
+    ${fi('fi-tagline-es','Tagline ES',d.tagline_es)}
+    ${fi('fi-tagline-en','Tagline EN',d.tagline_en)}
+    ${fi('fi-copyright-es','Copyright ES',d.copyright_es)}
+    ${fi('fi-copyright-en','Copyright EN',d.copyright_en)}
+    ${secT('Redes sociales')}
+  </div>`;
+  social.forEach((s, i) => {
+    html += `<div class="form-pillar" style="margin-bottom:4px;">
+      <span class="form-pillar-label">Red ${i+1}</span>
+      ${fiRow([[`fi-soc${i}-label`,'Etiqueta',s.label],[`fi-soc${i}-url`,'URL',s.url]])}
+    </div>`;
+  });
+
+  html += `<div class="form-grid">${secT('Colecciones')}</div>`;
+  cols.forEach((c, i) => {
+    html += `<div class="form-pillar" style="margin-bottom:4px;">
+      <span class="form-pillar-label">Colección ${i+1}</span>
+      ${fiRow([[`fi-col${i}-es`,'Texto ES',c.texto_es],[`fi-col${i}-en`,'Texto EN',c.texto_en],[`fi-col${i}-url`,'URL',c.url]])}
+    </div>`;
+  });
+
+  html += `<div class="form-grid">${secT('Información')}</div>`;
+  info.forEach((c, i) => {
+    html += `<div class="form-pillar" style="margin-bottom:4px;">
+      <span class="form-pillar-label">Enlace ${i+1}</span>
+      ${fiRow([[`fi-inf${i}-es`,'Texto ES',c.texto_es],[`fi-inf${i}-en`,'Texto EN',c.texto_en],[`fi-inf${i}-url`,'URL',c.url]])}
+    </div>`;
+  });
+
+  html += `<div class="form-grid">${secT('Legal')}</div>`;
+  legal.forEach((c, i) => {
+    html += `<div class="form-pillar" style="margin-bottom:4px;">
+      <span class="form-pillar-label">Enlace ${i+1}</span>
+      ${fiRow([[`fi-leg${i}-es`,'Texto ES',c.texto_es],[`fi-leg${i}-en`,'Texto EN',c.texto_en],[`fi-leg${i}-url`,'URL',c.url]])}
+    </div>`;
+  });
+  return html;
+}
+
+/* ══ READERS DE FORMULARIO ══ */
+
+function leerFormInicio(tipo) {
+  function val(id) { const el = document.getElementById(id); return el ? el.value.trim() : ''; }
+  switch (tipo) {
+    case 'hero':
+      return {
+        tagline_es: val('fi-tagline-es'), tagline_en: val('fi-tagline-en'),
+        cta_texto_es: val('fi-cta-texto-es'), cta_texto_en: val('fi-cta-texto-en'),
+        cta_url: val('fi-cta-url'), scroll_es: 'Scroll', scroll_en: 'Scroll',
+      };
+    case 'philosophy':
+      return {
+        eyebrow_es: val('fi-eyebrow-es'), eyebrow_en: val('fi-eyebrow-en'),
+        titulo_es: val('fi-titulo-es'), titulo_en: val('fi-titulo-en'),
+        pilares: [0,1,2].map(i => ({
+          titulo_es: val(`fi-pilar${i}-titulo-es`), titulo_en: val(`fi-pilar${i}-titulo-en`),
+          texto_es:  val(`fi-pilar${i}-texto-es`),  texto_en:  val(`fi-pilar${i}-texto-en`),
+        })),
+      };
+    case 'productos':
+      return {
+        eyebrow_es: val('fi-eyebrow-es'), eyebrow_en: val('fi-eyebrow-en'),
+        titulo_es:  val('fi-titulo-es'),  titulo_en:  val('fi-titulo-en'),
+      };
+    case 'legado':
+      return {
+        eyebrow_es: val('fi-eyebrow-es'), eyebrow_en: val('fi-eyebrow-en'),
+        titulo_es:  val('fi-titulo-es'),  titulo_en:  val('fi-titulo-en'),
+        p1_es: val('fi-p1-es'), p1_en: val('fi-p1-en'),
+        p2_es: val('fi-p2-es'), p2_en: val('fi-p2-en'),
+        cita_es: val('fi-cita-es'), cita_en: val('fi-cita-en'),
+        fundadora: val('fi-fundadora'),
+      };
+    case 'sustenta':
+      return {
+        eyebrow_es: val('fi-eyebrow-es'), eyebrow_en: val('fi-eyebrow-en'),
+        titulo_es:  val('fi-titulo-es'),  titulo_en:  val('fi-titulo-en'),
+        texto_es:   val('fi-texto-es'),   texto_en:   val('fi-texto-en'),
+        stats: [0,1,2].map(i => ({
+          numero:   val(`fi-stat${i}-numero`),
+          label_es: val(`fi-stat${i}-label-es`),
+          label_en: val(`fi-stat${i}-label-en`),
+        })),
+      };
+    case 'split1':
+    case 'split2':
+      return {
+        eyebrow_es: val('fi-eyebrow-es'), eyebrow_en: val('fi-eyebrow-en'),
+        titulo_es:  val('fi-titulo-es'),  titulo_en:  val('fi-titulo-en'),
+        texto_es:   val('fi-texto-es'),   texto_en:   val('fi-texto-en'),
+        foto_url:   val('fi-foto-url'),
+      };
+    case 'contacto':
+      return {
+        eyebrow_es: val('fi-eyebrow-es'), eyebrow_en: val('fi-eyebrow-en'),
+        titulo_es:  val('fi-titulo-es'),  titulo_en:  val('fi-titulo-en'),
+        texto_es:   val('fi-texto-es'),   texto_en:   val('fi-texto-en'),
+        cta_es: val('fi-cta-es'), cta_en: val('fi-cta-en'),
+        correo: val('fi-correo'),
+        instagram_handle: val('fi-instagram-handle'),
+        instagram_url:    val('fi-instagram-url'),
+        whatsapp_numero:  val('fi-whatsapp-numero'),
+        whatsapp_url:     val('fi-whatsapp-url'),
+        atelier: val('fi-atelier'),
+      };
+    case 'footer':
+      return {
+        tagline_es:   val('fi-tagline-es'),   tagline_en:   val('fi-tagline-en'),
+        copyright_es: val('fi-copyright-es'), copyright_en: val('fi-copyright-en'),
+        social:      [0,1,2].map(i   => ({ label: val(`fi-soc${i}-label`), url: val(`fi-soc${i}-url`) })),
+        colecciones: [0,1,2].map(i   => ({ texto_es: val(`fi-col${i}-es`), texto_en: val(`fi-col${i}-en`), url: val(`fi-col${i}-url`) })),
+        informacion: [0,1,2,3].map(i => ({ texto_es: val(`fi-inf${i}-es`), texto_en: val(`fi-inf${i}-en`), url: val(`fi-inf${i}-url`) })),
+        legal:       [0,1,2].map(i   => ({ texto_es: val(`fi-leg${i}-es`), texto_en: val(`fi-leg${i}-en`), url: val(`fi-leg${i}-url`) })),
+      };
+    default: {
+      try { return JSON.parse(document.getElementById('fi-raw-json')?.value || '{}'); }
+      catch(e) { return {}; }
+    }
+  }
+}
+
+/* ── Guardar (crear o actualizar) ── */
+async function guardarInicio() {
+  const btn   = document.getElementById('btn-guardar-inicio');
+  const errEl = document.getElementById('modal-inicio-error');
+  errEl.style.display = 'none';
+  btn.disabled = true; btn.textContent = 'Guardando…';
+
+  let error;
+  if (_inicioEditId) {
+    const row  = CONTENIDO_INICIO.find(r => r.id === _inicioEditId);
+    if (!row) { btn.disabled = false; btn.textContent = 'Guardar cambios'; return; }
+    const tipo = (row.datos && row.datos._tipo) || row.seccion;
+    const datos = leerFormInicio(tipo);
+    if (row.datos && row.datos._tipo) datos._tipo = row.datos._tipo;
+    ({ error } = await supabaseClient.from('contenido_inicio').update({ datos }).eq('id', _inicioEditId));
+  } else {
+    const tipo    = document.getElementById('fi-tipo-nuevo')?.value;
+    const nombre  = document.getElementById('fi-seccion-nombre')?.value.trim() || tipo;
+    if (!tipo) {
+      errEl.textContent = 'Selecciona un tipo de sección.';
+      errEl.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'Guardar cambios';
+      return;
+    }
+    const datos = leerFormInicio(tipo);
+    datos._tipo = tipo;
+    const maxOrden = CONTENIDO_INICIO.reduce((m, r) => Math.max(m, r.orden), 0);
+    ({ error } = await supabaseClient.from('contenido_inicio')
+      .insert({ seccion: nombre, orden: maxOrden + 1, activa: true, datos }));
+  }
+
+  btn.disabled = false; btn.textContent = 'Guardar cambios';
+
+  if (error) {
+    errEl.textContent = 'Error al guardar: ' + error.message;
+    errEl.style.display = 'block';
+    return;
+  }
+  cerrarModalInicio();
+  await cargarInicio();
+  mostrarToast(_inicioEditId ? 'Sección actualizada ✓' : 'Sección creada ✓');
+}
+
+/* ── Eliminar con confirmación ── */
+async function eliminarInicio(id) {
+  const row = CONTENIDO_INICIO.find(r => r.id === id);
+  if (!confirm(`¿Eliminar la sección "${row?.seccion}"?\nEsta acción no se puede deshacer.`)) return;
+  const { error } = await supabaseClient.from('contenido_inicio').delete().eq('id', id);
+  if (error) { mostrarToast('Error al eliminar'); return; }
+  await cargarInicio();
+  mostrarToast('Sección eliminada');
+}
 </script>
 </body>
 </html>
