@@ -42,14 +42,16 @@ function addToCart(product, qty = 1) {
 
 function removeFromCart(id) {
   loadCart();
-  cart = cart.filter(i => i.id !== id);
+  const idNum = Number(id);
+  cart = cart.filter(i => i.id !== id && i.id !== idNum);
   saveCart();
   renderCart();
 }
 
 function updateQty(id, qty) {
   loadCart();
-  const item = cart.find(i => i.id === id);
+  const idNum = Number(id);
+  const item = cart.find(i => i.id === id || i.id === idNum);
   if (item) {
     item.qty = Math.max(1, Math.min(qty, item.stock || 99));
     if (item.qty === 0) cart = cart.filter(i => i.id !== id);
