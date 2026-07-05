@@ -529,7 +529,6 @@
         <div class="page-sub">Edita, reordena y activa las secciones de mujercobra.cl · Los cambios se reflejan al recargar la página</div>
         <div class="table-header">
           <h3>Secciones del sitio</h3>
-          <button class="btn-add" onclick="abrirAgregarInicio()">+ Agregar sección</button>
         </div>
         <div id="lista-inicio">
           <p style="color:var(--ivory-dim);text-align:center;padding:30px;">Cargando…</p>
@@ -719,7 +718,6 @@ async function iniciarSesion() {
   const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
 
   if (error) {
-    alert('Error: ' + JSON.stringify(error));
     errEl.textContent = 'Correo o contraseña incorrectos.';
     errEl.style.display = 'block';
     btn.disabled = false;
