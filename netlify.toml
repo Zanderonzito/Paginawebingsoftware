@@ -1,0 +1,12 @@
+[build]
+  publish = "."
+
+[dev]
+  command = ""
+  port = 8888
+  targetPort = 3000
+
+[[redirects]]
+  from = "/api/upload-foto"
+  to = "/.netlify/functions/upload-foto"
+  status = 200

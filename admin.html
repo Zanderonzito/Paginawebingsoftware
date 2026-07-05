@@ -1064,95 +1064,102 @@ async function toggleTendencia(id, nuevoEstado) {
 }
 
 /* ── SUBIDA DE FOTO ── */
-function dragOver(e) {
-  e.preventDefault();
-  document.getElementById('upload-zone').style.borderColor = 'var(--copper)';
-}
-function dragLeave(e) {
-  document.getElementById('upload-zone').style.borderColor = 'var(--border)';
-}
-function dropFile(e) {
-  e.preventDefault();
-  dragLeave(e);
-  const file = e.dataTransfer.files[0];
-  if (file && file.type.startsWith('image/')) subirFoto(file);
-}
 
-async function subirFoto(file) {
+async function subirFotoGeneric(file, ids) {
   if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { mostrarToast('La foto no puede superar 5MB'); return; }
 
-  if (file.size > 5 * 1024 * 1024) {
-    mostrarToast('La foto no puede superar 5MB');
-    return;
-  }
+  const zone     = document.getElementById(ids.zone);
+  const estado   = document.getElementById(ids.estado);
+  const progreso = document.getElementById(ids.progreso);
+  const barra    = document.getElementById(ids.barra);
+  const texto    = document.getElementById(ids.texto);
+  const prev     = document.getElementById(ids.preview);
 
-  const progreso = document.getElementById('upload-progreso');
-  const barra    = document.getElementById('barra-progreso-upload');
-  const texto    = document.getElementById('upload-texto');
-  const estado   = document.getElementById('upload-estado');
-  const zone     = document.getElementById('upload-zone');
-  const prev     = document.getElementById('img-preview-el');
-
-  progreso.style.display = 'block';
-  estado.style.opacity   = '0.4';
+  progreso.style.display   = 'block';
+  estado.style.opacity     = '0.4';
   zone.style.pointerEvents = 'none';
-  barra.style.width = '30%';
-  texto.textContent = 'Subiendo imagen…';
+  barra.style.width        = '30%';
+  texto.textContent        = 'Subiendo imagen…';
 
   const ext    = file.name.split('.').pop().toLowerCase();
   const nombre = 'prod_' + Date.now() + '.' + ext;
 
   try {
     barra.style.width = '60%';
-
-    // Convertir archivo a base64
     const fileBase64 = await new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload  = () => resolve(reader.result.split(',')[1]);
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
-
-    // Llamar a la Netlify Function (la clave secreta vive ahí)
     const res = await fetch('/.netlify/functions/upload-foto', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        fileName:   nombre,
-        fileBase64: fileBase64,
-        fileType:   file.type,
-      }),
+      body: JSON.stringify({ fileName: nombre, fileBase64, fileType: file.type }),
     });
-
     const data = await res.json();
-
     if (!res.ok) throw new Error(data.error || 'Error al subir la foto');
-
     barra.style.width = '100%';
     texto.textContent = '✓ Foto subida correctamente';
-
-    document.getElementById('prod-imagen-url').value = data.url;
-    prev.src = data.url;
-    prev.style.display = 'block';
-
+    document.getElementById(ids.urlInput).value = data.url;
+    if (prev) { prev.src = data.url; prev.style.display = 'block'; }
     estado.innerHTML = `
       <div style="font-size:1.5rem;margin-bottom:6px;">✅</div>
       <div style="font-size:0.82rem;color:var(--copper-bright);">${file.name}</div>
       <div style="font-size:0.7rem;color:var(--ivory-dim);margin-top:4px;">Haz clic para cambiar la foto</div>`;
     estado.style.opacity = '1';
-
     setTimeout(() => { progreso.style.display = 'none'; }, 1500);
-
   } catch (err) {
     console.error('Error subiendo foto:', err);
-    barra.style.width = '0%';
-    texto.textContent = 'Error al subir la foto. Intenta de nuevo.';
-    texto.style.color = '#e74c3c';
+    barra.style.width    = '0%';
+    texto.textContent    = 'Error al subir la foto. Intenta de nuevo.';
+    texto.style.color    = '#e74c3c';
     estado.style.opacity = '1';
     mostrarToast('Error al subir la foto');
   } finally {
     zone.style.pointerEvents = 'auto';
   }
+}
+
+// ── Productos ──
+function dragOver(e) { e.preventDefault(); document.getElementById('upload-zone').style.borderColor = 'var(--copper)'; }
+function dragLeave(e) { document.getElementById('upload-zone').style.borderColor = 'var(--border)'; }
+function dropFile(e) {
+  e.preventDefault(); dragLeave(e);
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) subirFoto(file);
+}
+function subirFoto(file) {
+  return subirFotoGeneric(file, {
+    zone:     'upload-zone',
+    estado:   'upload-estado',
+    progreso: 'upload-progreso',
+    barra:    'barra-progreso-upload',
+    texto:    'upload-texto',
+    preview:  'img-preview-el',
+    urlInput: 'prod-imagen-url',
+  });
+}
+
+// ── Secciones Split ──
+function dragOverSplit(e) { e.preventDefault(); document.getElementById('split-upload-zone').style.borderColor = 'var(--copper)'; }
+function dragLeaveSplit(e) { document.getElementById('split-upload-zone').style.borderColor = 'var(--border)'; }
+function dropFileSplit(e) {
+  e.preventDefault(); dragLeaveSplit(e);
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) subirFotoSplit(file);
+}
+function subirFotoSplit(file) {
+  return subirFotoGeneric(file, {
+    zone:     'split-upload-zone',
+    estado:   'split-upload-estado',
+    progreso: 'split-upload-progreso',
+    barra:    'split-barra-progreso',
+    texto:    'split-upload-texto',
+    preview:  'split-img-preview',
+    urlInput: 'fi-foto-url',
+  });
 }
 
 /* ── CATEGORÍAS ── */
@@ -1573,6 +1580,44 @@ function buildFormSustenta(d) {
     </div>`;
   });
   return html;
+}
+
+/* SPLIT1 / SPLIT2 */
+function buildFormSplit(d) {
+  const fotoUrl = d.foto_url || '';
+  const estadoHtml = fotoUrl
+    ? `<div style="font-size:1.5rem;margin-bottom:6px;">✅</div>
+       <div style="font-size:0.82rem;color:var(--copper-bright);">Foto actual</div>
+       <div style="font-size:0.7rem;color:var(--ivory-dim);margin-top:4px;">Haz clic para cambiar la foto</div>`
+    : `<div style="font-size:2rem;margin-bottom:8px;">📸</div>
+       <div style="font-size:0.85rem;color:var(--copper-bright);">Arrastra una foto aquí o haz clic para seleccionar</div>
+       <div style="font-size:0.72rem;color:var(--ivory-dim);margin-top:4px;">JPG, PNG, WEBP · máx 5MB</div>`;
+  return `<div class="form-grid">
+    ${secT('Eyebrow')}
+    ${fiRow([['fi-eyebrow-es','Eyebrow ES',d.eyebrow_es||''],['fi-eyebrow-en','Eyebrow EN',d.eyebrow_en||'']])}
+    ${secT('Título')}
+    ${fiRow([['fi-titulo-es','Título ES',d.titulo_es||''],['fi-titulo-en','Título EN',d.titulo_en||'']])}
+    ${secT('Texto')}
+    ${fiRowTa([['fi-texto-es','Texto ES',d.texto_es||''],['fi-texto-en','Texto EN',d.texto_en||'']])}
+    ${secT('Foto')}
+    <div class="form-field full">
+      <label>Foto de sección</label>
+      <div id="split-upload-zone" style="border:2px dashed var(--border);padding:24px;text-align:center;cursor:pointer;transition:border-color 0.3s;position:relative;"
+           onclick="document.getElementById('split-file-input').click()"
+           ondragover="dragOverSplit(event)" ondragleave="dragLeaveSplit(event)" ondrop="dropFileSplit(event)">
+        <input type="file" id="split-file-input" accept="image/*" style="display:none" onchange="subirFotoSplit(this.files[0])">
+        <div id="split-upload-estado">${estadoHtml}</div>
+      </div>
+      <div id="split-upload-progreso" style="display:none;margin-top:10px;">
+        <div style="height:3px;background:var(--petrol-light);position:relative;overflow:hidden;">
+          <div id="split-barra-progreso" style="height:100%;background:var(--copper);width:0%;transition:width 0.4s;"></div>
+        </div>
+        <div id="split-upload-texto" style="font-size:0.72rem;color:var(--ivory-dim);margin-top:6px;text-align:center;"></div>
+      </div>
+      <img id="split-img-preview" src="${escForm(fotoUrl)}" style="${fotoUrl ? '' : 'display:none;'}width:100%;margin-top:10px;max-height:200px;object-fit:cover;">
+      <input type="hidden" id="fi-foto-url" value="${escForm(fotoUrl)}">
+    </div>
+  </div>`;
 }
 
 /* CONTACTO */
