@@ -267,6 +267,12 @@ async function procesarCheckout() {
 
     if (error) throw error;
 
+    const mpItems = cart.map(i => ({
+      nombre:     i.name,
+      cantidad:   i.qty,
+      precio_clp: i.price_clp,
+    }));
+
     clearCart();
     document.getElementById('checkout-modal')?.remove();
     window.MC?.showToast(
@@ -274,14 +280,18 @@ async function procesarCheckout() {
       '✅'
     );
 
-    // TODO: cuando tengan el Worker de Mercado Pago desplegado,
-    // reemplazar este alert por la llamada al Worker y redirección.
-    setTimeout(() => {
-      alert(isEn
-        ? `Your order ${pedido.codigo} has been registered.\nWe will contact you at ${email} to complete the payment.`
-        : `Tu pedido ${pedido.codigo} fue registrado.\nTe contactaremos a ${email} para completar el pago.`
-      );
-    }, 500);
+    const mpRes = await fetch('/api/crear-preferencia', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        items:         mpItems,
+        pedido_codigo: pedido.codigo,
+        cliente_email: email,
+      }),
+    });
+    const mpData = await mpRes.json();
+    if (!mpRes.ok) throw new Error(mpData.error || 'Error al crear preferencia de pago');
+    window.location.href = mpData.init_point;
 
   } catch (err) {
     console.error('Error creando pedido:', err);
