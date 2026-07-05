@@ -719,6 +719,7 @@ async function iniciarSesion() {
   const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
 
   if (error) {
+    alert('Error: ' + JSON.stringify(error));
     errEl.textContent = 'Correo o contraseña incorrectos.';
     errEl.style.display = 'block';
     btn.disabled = false;
