@@ -92,22 +92,12 @@ async function renderCart() {
   const summaryWrap = document.getElementById('cart-summary-wrap');
   if (!wrap) return;
 
-  // Auth gate — solo usuarios autenticados pueden ver el carrito
+  // Auth gate — abrir modal directamente si no hay sesión
   const { data: { session } } = await supabaseClient.auth.getSession();
   if (!session) {
-    const isEn = window.MC?.lang === 'en';
-    wrap.innerHTML = `
-      <div class="empty-cart reveal" style="text-align:center;padding:80px 20px;">
-        <div style="font-size:3rem;margin-bottom:20px;opacity:0.35;">🔒</div>
-        <h2 style="margin-bottom:12px;">${isEn ? 'Sign in to view your cart' : 'Inicia sesión para ver tu carrito'}</h2>
-        <p style="color:rgba(245,237,224,0.45);margin-bottom:28px;max-width:320px;margin-left:auto;margin-right:auto;">
-          ${isEn ? 'Your purchases are linked to your account.' : 'Tus compras están vinculadas a tu cuenta.'}
-        </p>
-        <button class="btn-primary" onclick="mostrarModalAuth('login')" style="margin:0 auto;">
-          <span>${isEn ? 'Sign In / Create account' : 'Iniciar sesión / Crear cuenta'}</span>
-        </button>
-      </div>`;
     if (summaryWrap) summaryWrap.innerHTML = '';
+    wrap.innerHTML = '';
+    if (typeof mostrarModalAuth === 'function') mostrarModalAuth('login');
     return;
   }
 

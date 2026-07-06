@@ -705,6 +705,30 @@ document.getElementById('login-pass').addEventListener('keydown', e => {
 });
 document.getElementById('btn-login').addEventListener('click', iniciarSesion);
 
+// Verificar rol administrador contra tabla roles_asignados
+async function verificarRolAdmin(userId) {
+  const { data, error } = await supabaseClient
+    .from('roles_asignados')
+    .select('rol')
+    .eq('user_id', userId)
+    .single();
+  if (error || !data) return false;
+  return data.rol === 'administrador';
+}
+
+// Restaurar sesión persistida si ya es admin
+(async function checkPersistedSession() {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session) return;
+  const esAdmin = await verificarRolAdmin(session.user.id);
+  if (!esAdmin) { await supabaseClient.auth.signOut(); return; }
+  SESSION = session;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('admin-panel').style.display = 'block';
+  document.getElementById('user-email-display').textContent = session.user.email;
+  cargarTodo();
+})();
+
 async function iniciarSesion() {
   const email = document.getElementById('login-email').value.trim();
   const pass  = document.getElementById('login-pass').value;
@@ -719,6 +743,16 @@ async function iniciarSesion() {
 
   if (error) {
     errEl.textContent = 'Correo o contraseña incorrectos.';
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Ingresar al panel';
+    return;
+  }
+
+  const esAdmin = await verificarRolAdmin(data.session.user.id);
+  if (!esAdmin) {
+    await supabaseClient.auth.signOut();
+    errEl.textContent = 'No tienes permisos de administrador.';
     errEl.style.display = 'block';
     btn.disabled = false;
     btn.textContent = 'Ingresar al panel';
