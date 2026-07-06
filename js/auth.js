@@ -45,7 +45,10 @@
     supabaseClient.auth.onAuthStateChange((_event, session) => {
       _currentUser = session?.user || null;
       actualizarNavAuth();
-      if (typeof renderCart === 'function') renderCart();
+      // Re-renderizar carrito solo al hacer login (SIGNED_IN) o logout (SIGNED_OUT)
+      if ((_event === 'SIGNED_IN' || _event === 'SIGNED_OUT') && typeof renderCart === 'function') {
+        renderCart();
+      }
     });
   }
 
