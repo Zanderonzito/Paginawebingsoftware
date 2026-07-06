@@ -100,10 +100,8 @@ function fmtUF(n) {
 /* ── Totals ────────────────────────────────────────────────── */
 function calcTotals() {
   const subtotal = cart.reduce((s, i) => s + i.price_clp * i.qty, 0);
-  const shipping = subtotal > 0 ? (subtotal > 150000 ? 0 : 5990) : 0;
-  const taxBase  = subtotal + shipping;
-  const total    = taxBase; // IVA incluido en precio (precio final)
-  return { subtotal, shipping, total };
+  const total    = subtotal;
+  return { subtotal, total };
 }
 
 /* ── Render cart page ──────────────────────────────────────── */
@@ -193,7 +191,7 @@ async function renderCart() {
   }).join('');
 
   // Summary
-  const { subtotal, shipping, total } = calcTotals();
+  const { subtotal, total } = calcTotals();
   if (summaryWrap) {
     summaryWrap.innerHTML = `
       <div class="cart-summary">
@@ -204,7 +202,9 @@ async function renderCart() {
         </div>
         <div class="summary-row">
           <span>${isEn ? 'Shipping' : 'Envío'}</span>
-          <span>${shipping === 0 ? (isEn ? 'Free' : 'Gratis') : fmtCLP(shipping)}</span>
+          <span style="font-size:0.78rem;color:rgba(245,237,224,0.5);font-style:italic;">
+            ${isEn ? 'To coordinate with seller' : 'A coordinar con la vendedora'}
+          </span>
         </div>
         <div class="summary-row total">
           <span>${isEn ? 'Total (IVA incl.)' : 'Total (IVA incl.)'}</span>
