@@ -48,6 +48,26 @@ function removeFromCart(id) {
   renderCart();
 }
 
+function confirmarEliminar(id) {
+  const isEn = window.MC?.lang === 'en';
+  const ok = confirm(isEn
+    ? 'Do you want to remove this product from your cart?'
+    : '¿Deseas eliminar este producto de tu carrito?');
+  if (ok) removeFromCart(id);
+}
+
+function decrementarCantidad(id, currentQty) {
+  if (currentQty <= 1) {
+    const isEn = window.MC?.lang === 'en';
+    const ok = confirm(isEn
+      ? 'Do you want to remove this product from your cart?'
+      : '¿Deseas eliminar este producto de tu carrito?');
+    if (ok) removeFromCart(id);
+    return;
+  }
+  updateQty(id, currentQty - 1);
+}
+
 function updateQty(id, qty) {
   loadCart();
   const idNum = Number(id);
@@ -121,7 +141,7 @@ async function renderCart() {
 
   if (cart.length === 0) {
     wrap.innerHTML = `
-      <div class="empty-cart reveal">
+      <div class="empty-cart">
         <svg width="64" height="64" viewBox="0 0 64 64" fill="none" style="margin:0 auto 20px;opacity:0.25">
           <circle cx="32" cy="32" r="30" stroke="currentColor" stroke-width="1.5"/>
           <path d="M20 24h24l-3 16H23L20 24z" stroke="currentColor" stroke-width="1.5" fill="none"/>
@@ -130,7 +150,7 @@ async function renderCart() {
         </svg>
         <h2>${isEn ? 'Your cart is empty' : 'Tu carrito está vacío'}</h2>
         <p>${isEn ? 'Discover our handcrafted pieces.' : 'Descubre nuestras piezas artesanales.'}</p>
-        <a href="shop.html" class="btn-primary"><span>${isEn ? 'Go to Shop' : 'Ir a la Tienda'}</span></a>
+        <a href="shop.html" class="btn-primary"><span>${isEn ? 'Keep Shopping' : 'Seguir Comprando'}</span></a>
       </div>`;
     if (summaryWrap) summaryWrap.innerHTML = '';
     return;
@@ -156,7 +176,7 @@ async function renderCart() {
         <div class="cart-item-name">${name}</div>
         <div class="cart-item-detail">${isEn ? (item.detail_en || '') : (item.detail || '')}</div>
         <div class="qty-control" style="margin-top:10px">
-          <button class="qty-btn" onclick="updateQty('${item.id}', ${item.qty - 1})">−</button>
+          <button class="qty-btn" onclick="decrementarCantidad('${item.id}', ${item.qty})">−</button>
           <input class="qty-value" type="number" value="${item.qty}" min="1" max="${item.stock || 99}"
             onchange="updateQty('${item.id}', parseInt(this.value)||1)">
           <button class="qty-btn" onclick="updateQty('${item.id}', ${item.qty + 1})">+</button>
@@ -165,7 +185,7 @@ async function renderCart() {
       <div class="cart-item-actions">
         <div class="cart-item-price">${fmtCLP(item.price_clp * item.qty)}</div>
         <div style="font-size:0.75rem;color:rgba(245,237,224,0.35)">${fmtUSD(item.price_clp * item.qty)}</div>
-        <button class="cart-remove" onclick="removeFromCart('${item.id}')">
+        <button class="cart-remove" onclick="confirmarEliminar('${item.id}')">
           ${isEn ? 'Remove' : 'Eliminar'}
         </button>
       </div>
