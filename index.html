@@ -166,36 +166,6 @@
       100% { transform:scaleY(0); transform-origin:bottom; }
     }
 
-    /* ── Philosophy ─────────────────────────────────────── */
-    .philosophy {
-      position:relative; padding:120px 60px;
-      overflow:hidden;
-    }
-    .philosophy .section-header { text-align:center; margin-bottom:72px; }
-    .philosophy-grid {
-      display:grid; grid-template-columns:repeat(3, 1fr); gap:2px;
-      max-width:1100px; margin:0 auto;
-    }
-    .pillar {
-      padding:52px 40px;
-      background:rgba(10,38,39,0.6);
-      border:1px solid rgba(232,184,120,0.08);
-      text-align:center;
-      transition:background var(--transition), border-color var(--transition);
-    }
-    .pillar:hover {
-      background:rgba(22,72,73,0.5);
-      border-color:rgba(232,184,120,0.2);
-    }
-    .pillar-icon {
-      width:56px; height:56px; margin:0 auto 28px;
-      stroke:var(--copper); fill:none; stroke-width:1;
-    }
-    .pillar-title {
-      font-family:var(--font-serif); font-size:0.85rem; letter-spacing:0.25em;
-      text-transform:uppercase; color:var(--copper-pale); margin-bottom:16px;
-    }
-    .pillar-text { font-size:0.88rem; color:rgba(245,237,224,0.55); line-height:1.7; }
 
     /* ── Productos / Carrusel ───────────────────────────────── */
     .productos {
@@ -243,17 +213,23 @@
     }
     .carrusel-externo { position:relative; }
     .carrusel-ventana {
-      overflow: hidden;
+      overflow-x: scroll;
+      overflow-y: hidden;
       padding: 10px 60px 30px;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE */
     }
+    .carrusel-ventana::-webkit-scrollbar { display: none; } /* Chrome/Safari */
     .carrusel-pista {
       display: flex;
       gap: 28px;
-      transition: transform 0.7s cubic-bezier(0.25,1,0.5,1);
-      will-change: transform;
+      width: max-content;
     }
     .producto-card {
       flex: 0 0 300px;
+      scroll-snap-align: start;
       background-color: #103b3c;
       border: 1px solid rgba(201,122,75,0.12);
       overflow: hidden;
@@ -380,70 +356,32 @@
       text-align: center;
     }
 
-    /* ── Legacy ─────────────────────────────────────────── */
-    .legado {
-      position:relative; padding:120px 60px; overflow:hidden;
-    }
-    .legado-inner {
-      position:relative; z-index:1;
-      display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center;
-      max-width:1100px; margin:0 auto;
-    }
-    .legado-text p {
-      color:rgba(245,237,224,0.6); margin-bottom:20px; font-size:0.95rem; line-height:1.8;
-    }
-    .legado-quote {
-      font-family:var(--font-display); font-style:italic;
-      font-size:1.25rem; color:var(--copper-bright);
-      border-left:2px solid var(--copper); padding-left:24px;
-      margin-top:32px; line-height:1.6;
-    }
-    .legado-visual {
-      aspect-ratio:3/4;
-      background:linear-gradient(135deg, var(--petrol-mid) 0%, var(--petrol-light) 100%);
-      border:1px solid rgba(232,184,120,0.1);
-      display:flex; align-items:center; justify-content:center;
-      position:relative; overflow:hidden;
-    }
-    .legado-visual::after {
-      content:''; position:absolute; inset:0;
-      background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 400'><path d='M150 40 Q 180 120 150 200 Q 120 280 150 360' stroke='%23e8b878' stroke-width='1.5' fill='none' opacity='0.3'/><path d='M150 40 Q 200 100 220 180 Q 240 260 200 340' stroke='%23c97a4b' stroke-width='1' fill='none' opacity='0.2'/><path d='M150 40 Q 100 100 80 180 Q 60 260 100 340' stroke='%23c97a4b' stroke-width='1' fill='none' opacity='0.2'/><circle cx='150' cy='40' r='8' stroke='%23e8b878' stroke-width='1' fill='none' opacity='0.4'/></svg>") center/cover;
-    }
-    .legado-visual-label {
-      position:absolute; bottom:0; left:0; right:0;
-      padding:20px; text-align:center;
-      font-size:0.65rem; letter-spacing:0.3em; text-transform:uppercase;
-      color:rgba(245,237,224,0.25);
-    }
 
-    /* ── Sustainability ─────────────────────────────────── */
-    .sustenta {
-      position:relative; padding:120px 60px; overflow:hidden;
+    /* ── Sec-Split ──────────────────────────────────────── */
+    .sec-split {
+      display:grid; grid-template-columns:1fr 1.6fr; min-height:500px;
+      background:var(--petrol-deep);
     }
-    .sustenta-inner {
-      position:relative; z-index:1;
-      max-width:1100px; margin:0 auto;
-      text-align:center;
+    .sec-split-inv { grid-template-columns:1.6fr 1fr; }
+    .sec-split-texto {
+      display:flex; flex-direction:column; justify-content:center;
+      padding:60px; gap:20px;
     }
-    .sustenta-text {
-      font-size:1rem; color:rgba(245,237,224,0.55); max-width:680px;
-      margin:24px auto 64px; line-height:1.8;
+    .sec-split-parrafo {
+      color:rgba(245,237,224,0.55); font-size:1rem; line-height:1.8; max-width:480px;
     }
-    .sustenta-stats {
-      display:grid; grid-template-columns:repeat(3,1fr); gap:40px;
+    .sec-split-foto { position:relative; overflow:hidden; }
+    .sec-split-foto img { width:100%; height:100%; object-fit:cover; }
+    .sec-split-foto-placeholder {
+      width:100%; height:100%; min-height:400px;
+      display:flex; align-items:center; justify-content:center;
+      background:var(--petrol-mid); font-size:3rem; opacity:0.3;
     }
-    .stat {
-      padding:40px 20px;
-      background:rgba(10,38,39,0.5);
-      border:1px solid rgba(232,184,120,0.08);
-    }
-    .stat-number {
-      font-family:var(--font-display); font-size:3.5rem; font-weight:300;
-      color:var(--copper-bright); line-height:1;
-    }
-    .stat-label {
-      font-size:0.72rem; letter-spacing:0.22em; text-transform:uppercase;
-      color:rgba(245,237,224,0.4); margin-top:12px;
+    @media (max-width:768px) {
+      .sec-split, .sec-split-inv { grid-template-columns:1fr; }
+      .sec-split .sec-split-foto { order:-1; }
+      .sec-split-inv .sec-split-foto { order:-1; }
+      .sec-split-texto { padding:40px 20px; }
     }
 
     /* ── Contact ────────────────────────────────────────── */
@@ -474,28 +412,56 @@
 
     /* ── Responsive ─────────────────────────────────────── */
     @media (max-width:900px) {
-      .philosophy { padding:80px 28px; }
-      .philosophy-grid { grid-template-columns:1fr; gap:2px; }
-      .legado { padding:80px 28px; }
-      .legado-inner { grid-template-columns:1fr; gap:40px; }
-      .legado-visual { display:none; }
-      .sustenta { padding:80px 28px; }
-      .sustenta-stats { grid-template-columns:1fr; gap:2px; }
-      .contacto { padding:80px 28px; }
-      .contacto-inner { grid-template-columns:1fr; gap:40px; }
+.contacto { padding:72px 20px; }
+      .contacto-inner { grid-template-columns:1fr; gap:32px; }
+      /* Carrusel — padding lateral reducido en tablet */
+      .productos-cabecera { padding-left:20px; padding-right:20px; }
+      .carrusel-ventana { padding-left:20px; padding-right:20px; padding-bottom:20px; }
+      .carrusel-controles { padding-left:20px; padding-right:20px; }
     }
     @media (max-width:768px) {
+      /* Hero: logo arriba compacto, foto abajo */
       .hero {
         grid-template-columns: 1fr;
-        grid-template-rows: auto 60vw;
-        height: auto;
+        grid-template-rows: 38vh 62vh;
+        height: 100svh;
+        min-height: 0;
+        padding-top: 0;
       }
-      .hero-panel-logo { padding:80px 32px 40px; }
-      .hero-panel-foto { min-height:60vw; }
+      .hero-panel-logo {
+        padding: 60px 24px 16px;
+        min-height: auto;
+        gap: 0;
+        justify-content: center;
+      }
+      /* Logo más pequeño */
+      .hero-logo { max-width: 160px; }
+      .hero-logo-separador { margin: 10px auto; }
+      .hero-tagline {
+        font-size: 0.72rem;
+        margin-bottom: 16px;
+      }
+      .hero-cta { padding: 9px 20px; font-size:0.62rem; }
+      .hero-panel-foto { min-height:68vw; }
+
+      /* Scroll indicator */
+      .hero-scroll {
+        right: 50%;
+        transform: translateX(50%);
+      }
+
+      /* Carrusel móvil */
       .productos-cabecera,
       .carrusel-ventana,
-      .carrusel-controles { padding-left:24px; padding-right:24px; }
-      .producto-card { flex:0 0 260px; }
+      .carrusel-controles { padding-left:16px; padding-right:16px; }
+      .producto-card { flex:0 0 240px; }
+      .seccion-titulo { font-size:clamp(1.6rem,7vw,2.4rem); }
+    }
+    @media (max-width:480px) {
+      .producto-card { flex:0 0 82vw; }
+      .hero-panel-logo { padding: 68px 20px 16px; }
+      .hero-logo { max-width: 160px; }
+      .channel { flex-direction:column; align-items:flex-start; gap:4px; padding:16px 20px; }
     }
   </style>
 </head>
@@ -505,10 +471,12 @@
 <nav class="nav" id="main-nav">
   <div class="nav-logo">MUJER COBRA</div>
   <ul class="nav-links">
+    <li class="nav-close-li">
+      <button class="nav-close-btn" aria-label="Cerrar menú">&times;</button>
+    </li>
     <li><a href="#productos" data-i18n="nav_collections">Colecciones</a></li>
     <li><a href="shop.html" data-i18n="nav_shop">Tienda</a></li>
-    <li><a href="#legado" data-i18n="nav_legacy">Legado</a></li>
-    <li><a href="#sustenta" data-i18n="nav_sustain">Sustentabilidad</a></li>
+    <li><a href="#tendencias">Tendencias</a></li>
     <li><a href="#contacto" data-i18n="nav_contact">Contacto</a></li>
     <li>
       <div class="lang-toggle">
@@ -516,6 +484,7 @@
         <button class="lang-btn" data-lang="en">EN</button>
       </div>
     </li>
+    <li><button id="nav-auth-btn" class="nav-auth-btn" onclick="mostrarModalAuth('login')">Iniciar sesión</button></li>
     <li>
       <a href="cart.html" class="nav-cart">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -527,7 +496,6 @@
         <span class="cart-count" style="display:none">0</span>
       </a>
     </li>
-    <li><a href="correccion-monetaria/index.html" data-i18n="nav_inventory" style="color:var(--copper)">Inventario</a></li>
   </ul>
   <button class="nav-hamburger" aria-label="Menu">
     <span></span><span></span><span></span>
@@ -547,9 +515,28 @@
 
   <!-- Panel derecho: foto/video a pantalla completa (75% del ancho) -->
   <div class="hero-panel-foto">
-    <video autoplay muted loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;">
+    <video autoplay muted loop playsinline webkit-playsinline
+      x5-playsinline x5-video-player-type="h5"
+      preload="auto"
+      style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;pointer-events:none;">
       <source src="portada.webm" type="video/webm">
+      <source src="portada.webp" type="image/webp">
     </video>
+    <script>
+    /* Forzar autoplay en iOS/Android si el navegador lo pausó */
+    (function() {
+      var v = document.currentScript.previousElementSibling;
+      while (v && v.tagName !== 'VIDEO') v = v.previousElementSibling;
+      if (!v) return;
+      function tryPlay() {
+        var p = v.play();
+        if (p && p.catch) p.catch(function(){});
+      }
+      v.addEventListener('canplay', tryPlay, { once: true });
+      document.addEventListener('touchstart', function() { tryPlay(); }, { once: true, passive: true });
+      tryPlay();
+    })();
+    </script>
     <!-- Indicador de scroll -->
     <div class="hero-scroll">
       <span class="hero-scroll-texto" data-i18n="hero_scroll">Scroll</span>
@@ -558,41 +545,6 @@
   </div>
 </section>
 
-<!-- ── FILOSOFÍA ───────────────────────────────────────────── -->
-<section class="philosophy">
-  <div class="kintsugi-bg"></div>
-  <div class="section-header reveal">
-    <span class="section-eyebrow" data-i18n="phil_eyebrow">Nuestra Esencia</span>
-    <h2 class="section-title" data-i18n="phil_title">Tres hilos que <em>tejen</em> cada pieza</h2>
-  </div>
-  <div class="philosophy-grid">
-    <div class="pillar reveal">
-      <svg class="pillar-icon" viewBox="0 0 56 56">
-        <path d="M28 6 L46 16 L46 34 L28 50 L10 34 L10 16 Z"/>
-        <circle cx="28" cy="28" r="8"/>
-      </svg>
-      <h3 class="pillar-title" data-i18n="phil1_title">Patrimonio</h3>
-      <p class="pillar-text" data-i18n="phil1_text">El cobre es memoria de Chile. Cada martillada recupera una tradición que atraviesa siglos, valles y manos.</p>
-    </div>
-    <div class="pillar reveal delay-1">
-      <svg class="pillar-icon" viewBox="0 0 56 56">
-        <path d="M28 8 Q16 20 20 34 Q24 46 28 48 Q32 46 36 34 Q40 20 28 8Z"/>
-        <path d="M28 20 L28 40"/>
-      </svg>
-      <h3 class="pillar-title" data-i18n="phil2_title">Fuerza</h3>
-      <p class="pillar-text" data-i18n="phil2_text">La cobra se alza sin estridencia. Nuestras piezas contienen esa firmeza: silenciosa, elegante, irreductible.</p>
-    </div>
-    <div class="pillar reveal delay-2">
-      <svg class="pillar-icon" viewBox="0 0 56 56">
-        <path d="M12 44 Q20 28 28 36 Q36 44 44 28"/>
-        <path d="M28 18 Q32 8 44 12 Q40 22 30 22"/>
-        <path d="M14 14 Q10 24 18 28"/>
-      </svg>
-      <h3 class="pillar-title" data-i18n="phil3_title">Sustentabilidad</h3>
-      <p class="pillar-text" data-i18n="phil3_text">Materiales reciclados, talleres locales, procesos lentos. Creer y crear sin deuda con la tierra.</p>
-    </div>
-  </div>
-</section>
 
 <!-- ── PRODUCTOS / CARRUSEL ────────────────────────────────── -->
 <section class="productos" id="productos">
@@ -604,82 +556,17 @@
   <div class="carrusel-externo">
     <div class="carrusel-ventana">
       <div class="carrusel-pista" id="carrusel-pista">
-
-        <div class="producto-card" data-indice="0">
-          <div class="producto-imagen" style="background-color:#3d1f0a;">
-            <div class="producto-placeholder">
-              <span class="producto-placeholder-icono">🪙</span>
-              <p class="producto-placeholder-texto" data-i18n="product_photo_jewelry">Foto del producto<br>Joyería en Cobre</p>
-            </div>
+        <!-- Los productos destacados se cargan desde Supabase -->
+        <div class="producto-card" style="opacity:0.4;pointer-events:none;">
+          <div class="producto-imagen" style="background-color:#103b3c;display:flex;align-items:center;justify-content:center;">
+            <span style="font-size:2rem;opacity:0.3;">🪙</span>
           </div>
           <div class="producto-info">
-            <p class="producto-categoria">Joyería</p>
-            <h3 class="producto-nombre">Aretes Cobra Doble</h3>
-            <p class="producto-precio">$28.000 CLP</p>
-            <a href="shop.html?filter=joyeria" class="producto-boton" data-i18n="product_view">Ver pieza</a>
+            <p class="producto-categoria">Cargando…</p>
+            <h3 class="producto-nombre">—</h3>
+            <p class="producto-precio">—</p>
           </div>
         </div>
-
-        <div class="producto-card" data-indice="1">
-          <div class="producto-imagen" style="background-color:#2a1508;">
-            <div class="producto-placeholder">
-              <span class="producto-placeholder-icono">🎨</span>
-              <p class="producto-placeholder-texto" data-i18n="product_photo_paintings">Foto del producto<br>Pinturas &amp; Cuadros</p>
-            </div>
-          </div>
-          <div class="producto-info">
-            <p class="producto-categoria">Pinturas &amp; Cuadros</p>
-            <h3 class="producto-nombre">Lienzo Kintsugi I</h3>
-            <p class="producto-precio">$85.000 CLP</p>
-            <a href="shop.html?filter=cuadros" class="producto-boton" data-i18n="product_view">Ver pieza</a>
-          </div>
-        </div>
-
-        <div class="producto-card" data-indice="2">
-          <div class="producto-imagen" style="background-color:#4a2210;">
-            <div class="producto-placeholder">
-              <span class="producto-placeholder-icono">👜</span>
-              <p class="producto-placeholder-texto" data-i18n="product_photo_textile">Foto del producto<br>Carteras de Lana</p>
-            </div>
-          </div>
-          <div class="producto-info">
-            <p class="producto-categoria">Textil</p>
-            <h3 class="producto-nombre">Cartera Wayra Natural</h3>
-            <p class="producto-precio">$42.000 CLP</p>
-            <a href="shop.html?filter=textil" class="producto-boton" data-i18n="product_view">Ver pieza</a>
-          </div>
-        </div>
-
-        <div class="producto-card" data-indice="3">
-          <div class="producto-imagen" style="background-color:#1a0d04;">
-            <div class="producto-placeholder">
-              <span class="producto-placeholder-icono">🪙</span>
-              <p class="producto-placeholder-texto" data-i18n="product_photo_jewelry">Foto del producto<br>Joyería en Cobre</p>
-            </div>
-          </div>
-          <div class="producto-info">
-            <p class="producto-categoria">Joyería</p>
-            <h3 class="producto-nombre">Pulsera Escama</h3>
-            <p class="producto-precio">$22.000 CLP</p>
-            <a href="shop.html?filter=joyeria" class="producto-boton" data-i18n="product_view">Ver pieza</a>
-          </div>
-        </div>
-
-        <div class="producto-card" data-indice="4">
-          <div class="producto-imagen" style="background-color:#3a1a08;">
-            <div class="producto-placeholder">
-              <span class="producto-placeholder-icono">🎨</span>
-              <p class="producto-placeholder-texto" data-i18n="product_photo_paintings">Foto del producto<br>Pinturas &amp; Cuadros</p>
-            </div>
-          </div>
-          <div class="producto-info">
-            <p class="producto-categoria">Pinturas &amp; Cuadros</p>
-            <h3 class="producto-nombre">Serie Cobre II</h3>
-            <p class="producto-precio">$110.000 CLP</p>
-            <a href="shop.html?filter=cuadros" class="producto-boton" data-i18n="product_view">Ver pieza</a>
-          </div>
-        </div>
-
       </div>
     </div>
 
@@ -694,46 +581,54 @@
   </div>
 </section>
 
-<!-- ── LEGADO ───────────────────────────────────────────────── -->
-<section class="legado" id="legado">
-  <div class="kintsugi-bg"></div>
-  <div class="legado-inner">
-    <div class="legado-text reveal">
-      <span class="section-eyebrow" data-i18n="legado_eyebrow">El Legado</span>
-      <h2 class="section-title" data-i18n="legado_title">Una mujer, un <em>oficio</em>, una historia chilena</h2>
-      <p data-i18n="legado_p1">Mujer Cobra nace de una convicción: que lo hecho a mano, con materiales nobles y tiempo honesto, sigue siendo el lujo verdadero.</p>
-      <p data-i18n="legado_p2">Cada pieza sale de un taller pequeño, con nombre propio, donde el error es rastro y la repetición nunca es idéntica.</p>
-      <blockquote class="legado-quote" data-i18n="legado_quote">"Golpear el cobre es escuchar lo que la tierra quiso decir mucho antes que nosotros."</blockquote>
+<!-- ── TENDENCIAS ─────────────────────────────────────────── -->
+<section class="productos" id="tendencias" style="display:none">
+  <div class="productos-cabecera">
+    <span class="seccion-ojo" id="tendencias-ojo">Tendencias</span>
+    <h2 class="seccion-titulo" id="tendencias-titulo">Lo más <em>buscado</em> ahora</h2>
+  </div>
+  <div class="carrusel-externo">
+    <div class="carrusel-ventana" id="carrusel-ventana-t">
+      <div class="carrusel-pista" id="carrusel-pista-t"></div>
     </div>
-    <div class="legado-visual reveal delay-1">
-      <div class="legado-visual-label">Bárbara Becerra · Fundadora</div>
+    <div class="carrusel-controles">
+      <button class="carrusel-flecha" id="flecha-izq-t" aria-label="Anterior">&#8249;</button>
+      <div class="carrusel-progreso-contenedor">
+        <div class="carrusel-progreso-barra" id="barra-progreso-t"></div>
+      </div>
+      <span class="carrusel-contador" id="carrusel-contador-t">1 / 1</span>
+      <button class="carrusel-flecha" id="flecha-der-t" aria-label="Siguiente">&#8250;</button>
     </div>
   </div>
 </section>
 
-<!-- ── SUSTENTABILIDAD ─────────────────────────────────────── -->
-<section class="sustenta" id="sustenta">
-  <div class="kintsugi-bg"></div>
-  <div class="sustenta-inner">
-    <div class="reveal">
-      <span class="section-eyebrow" data-i18n="sustain_eyebrow">Sustentabilidad</span>
-      <h2 class="section-title" data-i18n="sustain_title">Un oficio que <em>no cobra</em> a la tierra</h2>
-      <p class="sustenta-text" data-i18n="sustain_text">Trabajamos con cobre recuperado, lana de productores locales y procesos que respetan el ritmo del material.</p>
+<!-- ── SEC-SPLIT 1 ──────────────────────────────────────────── -->
+<section class="sec-split" id="sec-split-1">
+  <div class="sec-split-texto">
+    <span class="section-eyebrow" id="split1-eyebrow">Nuestra Historia</span>
+    <h2 class="section-title" id="split1-titulo">Joyería que <em>nace</em> de la tierra</h2>
+    <p class="sec-split-parrafo" id="split1-texto">Cada pieza de Mujer Cobra es única, creada a mano con cobre recuperado y técnicas ancestrales chilenas.</p>
+  </div>
+  <div class="sec-split-foto" id="split1-foto-wrap">
+    <img id="split1-foto" src="" alt="Sección 1" style="display:none;">
+    <div class="sec-split-foto-placeholder" id="split1-placeholder">
+      <span>📷</span>
     </div>
-    <div class="sustenta-stats">
-      <div class="stat reveal">
-        <div class="stat-number">100%</div>
-        <div class="stat-label" data-i18n="stat1_label">Cobre recuperado</div>
-      </div>
-      <div class="stat reveal delay-1">
-        <div class="stat-number">+12</div>
-        <div class="stat-label" data-i18n="stat2_label">Talleres locales</div>
-      </div>
-      <div class="stat reveal delay-2">
-        <div class="stat-number">0</div>
-        <div class="stat-label" data-i18n="stat3_label">Producción en masa</div>
-      </div>
+  </div>
+</section>
+
+<!-- ── SEC-SPLIT 2 ──────────────────────────────────────────── -->
+<section class="sec-split sec-split-inv" id="sec-split-2">
+  <div class="sec-split-foto" id="split2-foto-wrap">
+    <img id="split2-foto" src="" alt="Sección 2" style="display:none;">
+    <div class="sec-split-foto-placeholder" id="split2-placeholder">
+      <span>📷</span>
     </div>
+  </div>
+  <div class="sec-split-texto">
+    <span class="section-eyebrow" id="split2-eyebrow">Nuestro Proceso</span>
+    <h2 class="section-title" id="split2-titulo">Hecho a <em>mano</em>, con alma</h2>
+    <p class="sec-split-parrafo" id="split2-texto">Desde el diseño hasta el acabado final, cada detalle es trabajado con dedicación y amor por el oficio.</p>
   </div>
 </section>
 
@@ -794,7 +689,6 @@
       <ul>
         <li><a href="#legado" data-i18n="footer_about">Nuestra Historia</a></li>
         <li><a href="#sustenta" data-i18n="footer_sustain">Sustentabilidad</a></li>
-        <li><a href="correccion-monetaria/index.html" data-i18n="footer_inventory">Inventario</a></li>
         <li><a href="#contacto" data-i18n="footer_contact">Contacto</a></li>
       </ul>
     </div>
@@ -813,39 +707,106 @@
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
 <script>
-(function () {
-  var pista         = document.getElementById('carrusel-pista');
+/* ── Cargar productos destacados desde Supabase ─────────── */
+(async function cargarDestacados() {
+  const pista   = document.getElementById('carrusel-pista');
+  const ventana = document.querySelector('.carrusel-ventana');
+  if (!pista) return;
+
+  try {
+    const { data: prods } = await supabaseClient
+      .from('productos')
+      .select('*, categorias(nombre_es, nombre_en)')
+      .eq('disponible', true)
+      .eq('destacado', true)
+      .order('creado_en', { ascending: false });
+
+    if (!prods || prods.length === 0) return;
+
+    const lang = document.documentElement.lang || 'es';
+    const isEn = lang === 'en';
+
+    function tarjetaHTML(p) {
+      const nombre = isEn ? (p.nombre_en || p.nombre_es) : p.nombre_es;
+      const cat    = isEn
+        ? (p.categorias?.nombre_en || p.categorias?.nombre_es || '')
+        : (p.categorias?.nombre_es || '');
+      const precio = '$' + Number(p.precio_clp).toLocaleString('es-CL') + ' CLP';
+      const imgHtml = (p.imagenes && p.imagenes.length > 0)
+        ? `<img src="${p.imagenes[0]}" alt="${nombre}" style="width:100%;height:100%;object-fit:cover;display:block;">`
+        : `<div class="producto-placeholder"><span class="producto-placeholder-icono">🪙</span><p class="producto-placeholder-texto">${cat}</p></div>`;
+      return `<div class="producto-card">
+        <div class="producto-imagen">${imgHtml}</div>
+        <div class="producto-info">
+          <p class="producto-categoria">${cat}</p>
+          <h3 class="producto-nombre">${nombre}</h3>
+          <p class="producto-precio">${precio}</p>
+          <a href="shop.html" class="producto-boton">${isEn ? 'View piece' : 'Ver pieza'}</a>
+        </div>
+      </div>`;
+    }
+
+    pista.innerHTML = prods.map(p => tarjetaHTML(p)).join('');
+    iniciarCarrusel(prods.length);
+
+  } catch (err) {
+    console.error('Error cargando destacados:', err);
+  }
+})();
+
+/* ── Carrusel con scroll snap ───────────────────────────── */
+function iniciarCarrusel(total) {
+  var ventana       = document.querySelector('.carrusel-ventana');
   var flechaIzq     = document.getElementById('flecha-izq');
   var flechaDer     = document.getElementById('flecha-der');
   var barraProgreso = document.getElementById('barra-progreso');
   var contadorEl    = document.getElementById('carrusel-contador');
-  var ventana       = document.querySelector('.carrusel-ventana');
+
+  if (!ventana || !total) return;
 
   var DURACION  = 4000;
-  var ANCHO_CARD = 300 + 28;
-  var indice    = 0;
-  var total     = pista.querySelectorAll('.producto-card').length;
-  var porVista  = 3;
-  var timer     = null;
+  var ANCHO_CARD = 328;
+  var pasoActual = 0;
+  var timer      = null;
+  var porVista   = 3;
 
   function actualizarPorVista() {
-    var w = ventana.offsetWidth;
-    if      (w < 600) porVista = 1;
-    else if (w < 900) porVista = 2;
-    else              porVista = 3;
+    // Calcular cuántas tarjetas caben realmente en el contenedor
+    var anchoContenedor = ventana.offsetWidth - 120; // restar padding (60px cada lado)
+    porVista = Math.max(1, Math.floor((anchoContenedor + 28) / ANCHO_CARD));
+    // Limitar a la cantidad de productos disponibles
+    if (porVista > total) porVista = total;
   }
 
-  function irA(i) {
+  function totalPasos() {
+    // pasos = total - (visibles - 1): cada paso mueve 1 producto nuevo sin repetir
+    return Math.max(1, total - porVista + 1);
+  }
+
+  function actualizarContador() {
+    contadorEl.textContent = (pasoActual + 1) + ' / ' + totalPasos();
+  }
+
+  function irAPaso(paso) {
     actualizarPorVista();
-    var max = Math.max(0, total - porVista);
-    if (i > max) i = 0;
-    if (i < 0)   i = max;
-    indice = i;
-    pista.style.transform = 'translateX(-' + (indice * ANCHO_CARD) + 'px)';
-    contadorEl.textContent = (indice + 1) + ' / ' + total;
-    flechaIzq.disabled = false;
-    flechaDer.disabled = false;
+    var max = totalPasos() - 1;
+    if (paso > max) paso = 0;
+    if (paso < 0)   paso = max;
+    pasoActual = paso;
+
+    var scrollX;
+    if (paso === max) {
+      // Último paso: ir exactamente al final sin espacios vacíos
+      scrollX = ventana.scrollWidth - ventana.offsetWidth;
+    } else {
+      scrollX = pasoActual * ANCHO_CARD;
+    }
+
+    ventana.scrollTo({ left: scrollX, behavior: 'smooth' });
+    actualizarContador();
     reiniciarProgreso();
   }
 
@@ -862,40 +823,452 @@
 
   function iniciarAutoplay() {
     clearInterval(timer);
-    timer = setInterval(function () { irA(indice + 1); }, DURACION);
+    timer = setInterval(function () { irAPaso(pasoActual + 1); }, DURACION);
   }
 
-  pista.addEventListener('mouseenter', function () {
-    clearInterval(timer);
-    var w = window.getComputedStyle(barraProgreso).width;
-    barraProgreso.style.transition = 'none';
-    barraProgreso.style.width = w;
+  // Actualizar contador cuando el usuario hace scroll manual (touch)
+  // Usamos scrollend si está disponible, sino scroll con debounce
+  var scrollTimer = null;
+  function onScrollEnd() {
+    var paso = Math.round(ventana.scrollLeft / ANCHO_CARD);
+    actualizarPorVista();
+    var max = totalPasos() - 1;
+    pasoActual = Math.min(Math.max(paso, 0), max);
+    actualizarContador();
+  }
+
+  if ('onscrollend' in window) {
+    ventana.addEventListener('scrollend', onScrollEnd, { passive: true });
+  } else {
+    ventana.addEventListener('scroll', function () {
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(onScrollEnd, 80);
+    }, { passive: true });
+  }
+
+  ventana.addEventListener('mouseenter', function () { clearInterval(timer); });
+  ventana.addEventListener('mouseleave', function () { iniciarAutoplay(); });
+
+  flechaIzq.addEventListener('click', function () {
+    clearInterval(timer); irAPaso(pasoActual - 1); iniciarAutoplay();
+  });
+  flechaDer.addEventListener('click', function () {
+    clearInterval(timer); irAPaso(pasoActual + 1); iniciarAutoplay();
   });
 
-  pista.addEventListener('mouseleave', function () {
-    irA(indice);
-    iniciarAutoplay();
+  window.addEventListener('resize', function () {
+    actualizarPorVista();
+    actualizarContador();
   });
-
-  flechaIzq.addEventListener('click', function () { irA(indice - 1); iniciarAutoplay(); });
-  flechaDer.addEventListener('click', function () { irA(indice + 1); iniciarAutoplay(); });
-
-  var touchX = 0;
-  pista.addEventListener('touchstart', function (e) { touchX = e.touches[0].clientX; }, { passive: true });
-  pista.addEventListener('touchend',   function (e) {
-    var d = e.changedTouches[0].clientX - touchX;
-    if (d < -40) { irA(indice + 1); iniciarAutoplay(); }
-    if (d >  40) { irA(indice - 1); iniciarAutoplay(); }
-  });
-
-  window.addEventListener('resize', function () { actualizarPorVista(); irA(indice); });
 
   actualizarPorVista();
-  irA(0);
+  actualizarContador();
+  reiniciarProgreso();
   iniciarAutoplay();
+}
+
+/* ── Cargar productos en tendencia ─────────────────────── */
+(async function cargarTendencias() {
+  var seccion = document.getElementById('tendencias');
+  var pista   = document.getElementById('carrusel-pista-t');
+  if (!pista || !seccion) return;
+
+  try {
+    var res = await supabaseClient
+      .from('productos')
+      .select('*, categorias(nombre_es, nombre_en)')
+      .eq('disponible', true)
+      .eq('tendencia', true)
+      .order('creado_en', { ascending: false });
+
+    var prods = res.data;
+    if (!prods || prods.length === 0) return; // sección permanece oculta
+
+    var lang = document.documentElement.lang || 'es';
+    var isEn = lang === 'en';
+
+    function tarjeta(p) {
+      var nombre = isEn ? (p.nombre_en || p.nombre_es) : p.nombre_es;
+      var cat    = isEn
+        ? (p.categorias && (p.categorias.nombre_en || p.categorias.nombre_es) || '')
+        : (p.categorias && p.categorias.nombre_es || '');
+      var precio = '$' + Number(p.precio_clp).toLocaleString('es-CL') + ' CLP';
+      var img    = (p.imagenes && p.imagenes.length > 0)
+        ? '<img src="' + p.imagenes[0] + '" alt="' + nombre + '" style="width:100%;height:100%;object-fit:cover;display:block;">'
+        : '<div class="producto-placeholder"><span class="producto-placeholder-icono">🪙</span><p class="producto-placeholder-texto">' + cat + '</p></div>';
+      return '<div class="producto-card">' +
+        '<div class="producto-imagen">' + img + '</div>' +
+        '<div class="producto-info">' +
+          '<p class="producto-categoria">' + cat + '</p>' +
+          '<h3 class="producto-nombre">' + nombre + '</h3>' +
+          '<p class="producto-precio">' + precio + '</p>' +
+          '<a href="shop.html" class="producto-boton">' + (isEn ? 'View piece' : 'Ver pieza') + '</a>' +
+        '</div></div>';
+    }
+
+    pista.innerHTML = prods.map(tarjeta).join('');
+    seccion.style.display = '';
+
+    // Encabezado bilingüe + re-aplicar en cambio de idioma
+    var ojo    = document.getElementById('tendencias-ojo');
+    var titulo = document.getElementById('tendencias-titulo');
+    function setLangT(L) {
+      if (ojo)    ojo.textContent  = L === 'en' ? 'Trends'                   : 'Tendencias';
+      if (titulo) titulo.innerHTML = L === 'en' ? 'Most <em>wanted</em> now' : 'Lo más <em>buscado</em> ahora';
+    }
+    setLangT(lang);
+    new MutationObserver(function () {
+      setLangT(document.documentElement.lang || 'es');
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+
+    iniciarCarruselEn(
+      document.getElementById('carrusel-ventana-t'),
+      document.getElementById('flecha-izq-t'),
+      document.getElementById('flecha-der-t'),
+      document.getElementById('barra-progreso-t'),
+      document.getElementById('carrusel-contador-t'),
+      prods.length
+    );
+
+  } catch (err) {
+    console.error('Error cargando tendencias:', err);
+  }
+})();
+
+/* ── Carrusel genérico (recibe elementos, no IDs hardcodeados) ── */
+function iniciarCarruselEn(ventana, flechaIzq, flechaDer, barraProgreso, contadorEl, total) {
+  if (!ventana || !total) return;
+
+  var DURACION   = 4000;
+  var ANCHO_CARD = 328;
+  var pasoActual = 0;
+  var timer      = null;
+  var porVista   = 3;
+
+  function actualizarPorVista() {
+    var anchoContenedor = ventana.offsetWidth - 120;
+    porVista = Math.max(1, Math.floor((anchoContenedor + 28) / ANCHO_CARD));
+    if (porVista > total) porVista = total;
+  }
+  function totalPasos() { return Math.max(1, total - porVista + 1); }
+  function actualizarContador() { contadorEl.textContent = (pasoActual + 1) + ' / ' + totalPasos(); }
+
+  function irAPaso(paso) {
+    actualizarPorVista();
+    var max = totalPasos() - 1;
+    if (paso > max) paso = 0;
+    if (paso < 0)   paso = max;
+    pasoActual = paso;
+    var scrollX = paso === max ? ventana.scrollWidth - ventana.offsetWidth : pasoActual * ANCHO_CARD;
+    ventana.scrollTo({ left: scrollX, behavior: 'smooth' });
+    actualizarContador();
+    reiniciarProgreso();
+  }
+
+  function reiniciarProgreso() {
+    barraProgreso.style.transition = 'none';
+    barraProgreso.style.width = '0%';
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        barraProgreso.style.transition = 'width ' + DURACION + 'ms linear';
+        barraProgreso.style.width = '100%';
+      });
+    });
+  }
+
+  function iniciarAutoplay() {
+    clearInterval(timer);
+    timer = setInterval(function () { irAPaso(pasoActual + 1); }, DURACION);
+  }
+
+  var scrollTimer = null;
+  function onScrollEnd() {
+    var paso = Math.round(ventana.scrollLeft / ANCHO_CARD);
+    actualizarPorVista();
+    pasoActual = Math.min(Math.max(paso, 0), totalPasos() - 1);
+    actualizarContador();
+  }
+
+  if ('onscrollend' in window) {
+    ventana.addEventListener('scrollend', onScrollEnd, { passive: true });
+  } else {
+    ventana.addEventListener('scroll', function () {
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(onScrollEnd, 80);
+    }, { passive: true });
+  }
+
+  ventana.addEventListener('mouseenter', function () { clearInterval(timer); });
+  ventana.addEventListener('mouseleave', function () { iniciarAutoplay(); });
+  flechaIzq.addEventListener('click', function () { clearInterval(timer); irAPaso(pasoActual - 1); iniciarAutoplay(); });
+  flechaDer.addEventListener('click', function () { clearInterval(timer); irAPaso(pasoActual + 1); iniciarAutoplay(); });
+  window.addEventListener('resize', function () { actualizarPorVista(); actualizarContador(); });
+
+  actualizarPorVista();
+  actualizarContador();
+  reiniciarProgreso();
+  iniciarAutoplay();
+}
+</script>
+
+<!-- ── CMS: contenido dinámico desde contenido_inicio ──────── -->
+<script>
+(function () {
+  'use strict';
+
+  var _datos = null; // filas de Supabase, null hasta que cargue
+
+  function getLang() {
+    // document.documentElement.lang lo setea main.js; localStorage es el fallback
+    return document.documentElement.lang || localStorage.getItem('mc-lang') || 'es';
+  }
+
+  // Devuelve campo_es / campo_en con fallback a _es
+  function campo(obj, clave, L) {
+    return obj[clave + '_' + L] || obj[clave + '_es'] || '';
+  }
+
+  // Escapa valores para construir atributos HTML (href, title) y texto en innerHTML
+  function esc(s) {
+    return String(s || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  /* ── Sección HERO ── */
+  function aplicarHero(d, L) {
+    var tagline = document.querySelector('.hero-tagline');
+    var cta     = document.querySelector('.hero-cta');
+    var scroll  = document.querySelector('.hero-scroll-texto');
+    if (tagline) tagline.textContent = campo(d, 'tagline', L);
+    if (cta) {
+      cta.textContent = campo(d, 'cta_texto', L);
+      if (d.cta_url) cta.href = d.cta_url;
+    }
+    if (scroll) scroll.textContent = d['scroll_' + L] || d.scroll_es || 'Scroll';
+  }
+
+  /* ── Sección PHILOSOPHY ── */
+  function aplicarPhilosophy(d, L) {
+    var sec = document.querySelector('.philosophy');
+    if (!sec) return;
+    var eyebrow = sec.querySelector('.section-eyebrow');
+    var title   = sec.querySelector('.section-title');
+    var pTitles = sec.querySelectorAll('.pillar-title');
+    var pTexts  = sec.querySelectorAll('.pillar-text');
+    if (eyebrow) eyebrow.textContent = campo(d, 'eyebrow', L);
+    if (title)   title.innerHTML     = campo(d, 'titulo', L);  // contiene <em>
+    if (Array.isArray(d.pilares)) {
+      d.pilares.forEach(function (p, i) {
+        if (pTitles[i]) pTitles[i].textContent = campo(p, 'titulo', L);
+        if (pTexts[i])  pTexts[i].textContent  = campo(p, 'texto', L);
+      });
+    }
+  }
+
+  /* ── Sección PRODUCTOS ── */
+  function aplicarProductos(d, L) {
+    var sec = document.querySelector('.productos');
+    if (!sec) return;
+    var ojo   = sec.querySelector('.seccion-ojo');
+    var title = sec.querySelector('.seccion-titulo');
+    if (ojo)   ojo.textContent  = campo(d, 'eyebrow', L);
+    if (title) title.innerHTML  = campo(d, 'titulo', L);  // contiene <em>
+  }
+
+  /* ── Sección LEGADO ── */
+  function aplicarLegado(d, L) {
+    var sec = document.getElementById('legado');
+    if (!sec) return;
+    var eyebrow = sec.querySelector('.section-eyebrow');
+    var title   = sec.querySelector('.section-title');
+    var ps      = sec.querySelectorAll('.legado-text p');
+    var quote   = sec.querySelector('.legado-quote');
+    var label   = sec.querySelector('.legado-visual-label');
+    if (eyebrow) eyebrow.textContent = campo(d, 'eyebrow', L);
+    if (title)   title.innerHTML     = campo(d, 'titulo', L);  // contiene <em>
+    if (ps[0])   ps[0].textContent   = campo(d, 'p1', L);
+    if (ps[1])   ps[1].textContent   = campo(d, 'p2', L);
+    if (quote)   quote.textContent   = campo(d, 'cita', L);
+    if (label && d.fundadora) label.textContent = d.fundadora;
+  }
+
+  /* ── Sección SUSTENTA ── */
+  function aplicarSustenta(d, L) {
+    var sec = document.getElementById('sustenta');
+    if (!sec) return;
+    var eyebrow = sec.querySelector('.section-eyebrow');
+    var title   = sec.querySelector('.section-title');
+    var texto   = sec.querySelector('.sustenta-text');
+    var nums    = sec.querySelectorAll('.stat-number');
+    var labels  = sec.querySelectorAll('.stat-label');
+    if (eyebrow) eyebrow.textContent = campo(d, 'eyebrow', L);
+    if (title)   title.innerHTML     = campo(d, 'titulo', L);  // contiene <em>
+    if (texto)   texto.textContent   = campo(d, 'texto', L);
+    if (Array.isArray(d.stats)) {
+      d.stats.forEach(function (s, i) {
+        if (nums[i])   nums[i].textContent   = s.numero;
+        if (labels[i]) labels[i].textContent = s['label_' + L] || s.label_es;
+      });
+    }
+  }
+
+  /* ── Sección SPLIT (split1 / split2) ── */
+  function aplicarSplit(d, L, id) {
+    var sec = document.getElementById(id);
+    if (!sec) return;
+    var num = id === 'sec-split-1' ? '1' : '2';
+    var eyebrow     = document.getElementById('split' + num + '-eyebrow');
+    var title       = document.getElementById('split' + num + '-titulo');
+    var texto       = document.getElementById('split' + num + '-texto');
+    var img         = document.getElementById('split' + num + '-foto');
+    var placeholder = document.getElementById('split' + num + '-placeholder');
+    if (eyebrow) eyebrow.textContent = campo(d, 'eyebrow', L);
+    if (title)   title.innerHTML     = campo(d, 'titulo', L);
+    if (texto)   texto.textContent   = campo(d, 'texto', L);
+    var url = d.foto_url || '';
+    if (url) {
+      if (img)         { img.src = url; img.style.display = ''; }
+      if (placeholder) placeholder.style.display = 'none';
+    } else {
+      if (img)         img.style.display = 'none';
+      if (placeholder) placeholder.style.display = '';
+    }
+  }
+
+  /* ── Sección CONTACTO ── */
+  function aplicarContacto(d, L) {
+    var sec = document.getElementById('contacto');
+    if (!sec) return;
+    var eyebrow  = sec.querySelector('.section-eyebrow');
+    var title    = sec.querySelector('.section-title');
+    var texto    = sec.querySelector('.contacto-text');
+    var ctaLink  = sec.querySelector('a.btn-primary');
+    var ctaSpan  = ctaLink && ctaLink.querySelector('span');
+    var channels = sec.querySelector('.contact-channels');
+
+    if (eyebrow) eyebrow.textContent = campo(d, 'eyebrow', L);
+    if (title)   title.innerHTML     = campo(d, 'titulo', L);  // contiene <em>
+    if (texto)   texto.textContent   = campo(d, 'texto', L);
+    if (ctaSpan) ctaSpan.textContent = d['cta_' + L] || d.cta_es;
+    if (ctaLink && d.correo) ctaLink.href = 'mailto:' + d.correo;
+
+    if (channels && d.correo) {
+      var lCorreo  = L === 'en' ? 'Email'  : 'Correo';
+      channels.innerHTML =
+        '<a href="mailto:' + esc(d.correo) + '" class="channel">' +
+          '<span class="channel-label">' + lCorreo + '</span>' +
+          '<span class="channel-value">' + esc(d.correo) + '</span>' +
+        '</a>' +
+        '<a href="' + esc(d.instagram_url) + '" target="_blank" class="channel">' +
+          '<span class="channel-label">Instagram</span>' +
+          '<span class="channel-value">' + esc(d.instagram_handle) + '</span>' +
+        '</a>' +
+        '<a href="' + esc(d.whatsapp_url) + '" target="_blank" class="channel">' +
+          '<span class="channel-label">WhatsApp</span>' +
+          '<span class="channel-value">' + esc(d.whatsapp_numero) + '</span>' +
+        '</a>' +
+        '<div class="channel">' +
+          '<span class="channel-label">Atelier</span>' +
+          '<span class="channel-value">' + esc(d.atelier) + '</span>' +
+        '</div>';
+    }
+  }
+
+  /* ── Sección FOOTER ── */
+  function aplicarFooter(d, L) {
+    var footer = document.querySelector('footer');
+    if (!footer) return;
+    var taglines  = footer.querySelectorAll('.footer-tagline');
+    var social    = footer.querySelector('.footer-social');
+    var cols      = footer.querySelectorAll('.footer-col');
+    var copyEl    = footer.querySelector('.footer-bottom span');
+    var tagBottom = footer.querySelector('.footer-bottom em');
+
+    var tagline = campo(d, 'tagline', L);
+    taglines.forEach(function (el) { el.textContent = tagline; });
+    if (tagBottom) tagBottom.textContent = tagline;
+    if (copyEl)    copyEl.textContent    = campo(d, 'copyright', L);
+
+    if (social && Array.isArray(d.social)) {
+      social.innerHTML = d.social.map(function (s) {
+        var ext = s.url.indexOf('mailto:') !== 0 ? ' target="_blank"' : '';
+        return '<a href="' + esc(s.url) + '"' + ext + ' title="' + esc(s.label) + '">' + esc(s.label) + '</a>';
+      }).join('');
+    }
+
+    var colHeaders = [
+      L === 'en' ? 'Collections' : 'Colecciones',
+      L === 'en' ? 'Information' : 'Información',
+      'Legal'
+    ];
+    [d.colecciones, d.informacion, d.legal].forEach(function (links, i) {
+      if (!cols[i] || !Array.isArray(links)) return;
+      var h4 = cols[i].querySelector('h4');
+      var ul = cols[i].querySelector('ul');
+      if (h4) h4.textContent = colHeaders[i];
+      if (ul) ul.innerHTML = links.map(function (lnk) {
+        return '<li><a href="' + esc(lnk.url) + '">' + esc(lnk['texto_' + L] || lnk.texto_es) + '</a></li>';
+      }).join('');
+    });
+  }
+
+  /* ── Despachador principal ── */
+  function aplicarTodo(L) {
+    if (!_datos) return;
+    L = L || getLang();
+    _datos.forEach(function (row) {
+      switch (row.seccion) {
+        case 'hero':       aplicarHero(row.datos, L);       break;
+        case 'philosophy': aplicarPhilosophy(row.datos, L); break;
+        case 'productos':  aplicarProductos(row.datos, L);  break;
+        case 'legado':     aplicarLegado(row.datos, L);     break;
+        case 'sustenta':   aplicarSustenta(row.datos, L);   break;
+        case 'split1':     aplicarSplit(row.datos, L, 'sec-split-1'); break;
+        case 'split2':     aplicarSplit(row.datos, L, 'sec-split-2'); break;
+        case 'contacto':   aplicarContacto(row.datos, L);   break;
+        case 'footer':     aplicarFooter(row.datos, L);     break;
+      }
+    });
+  }
+
+  /* ── Fetch desde Supabase ── */
+  async function cargar() {
+    try {
+      var res = await supabaseClient
+        .from('contenido_inicio')
+        .select('seccion, datos')
+        .eq('activa', true)
+        .order('orden');
+
+      if (res.error || !res.data || res.data.length === 0) return;
+
+      _datos = res.data;
+      aplicarTodo(getLang());
+
+      // Re-aplicar al cambiar idioma: main.js setea document.documentElement.lang
+      new MutationObserver(function () {
+        aplicarTodo(document.documentElement.lang || getLang());
+      }).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+
+    } catch (e) {
+      // fallo silencioso — HTML hardcodeado queda como fallback
+    }
+  }
+
+  // Los scripts están al final del body, el DOM ya está disponible
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', cargar);
+  } else {
+    cargar();
+  }
 })();
 </script>
+
 <script src="js/main.js"></script>
+<script src="js/auth.js"></script>
 <script src="js/cart.js"></script>
 </body>
 </html>

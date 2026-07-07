@@ -1,1 +1,32 @@
+# macOS
 .DS_Store
+.AppleDouble
+.LSOverride
+
+# Variables de entorno — NUNCA subir al repo
+.env
+.env.local
+.env.development
+.env.production
+*.env
+
+# Claves y secretos
+*.pem
+*.key
+secrets.json
+
+# Dependencias
+node_modules/
+npm-debug.log*
+
+# Build
+dist/
+build/
+.cache/
+
+# Editor
+.vscode/settings.json
+.idea/
+
+# Netlify
+.netlify/

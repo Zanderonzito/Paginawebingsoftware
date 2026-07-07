@@ -218,21 +218,46 @@ function initNav() {
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
-  // Hamburger
   const hamburger = nav.querySelector('.nav-hamburger');
   const navLinks  = nav.querySelector('.nav-links');
   if (hamburger && navLinks) {
+    // En móvil, mover nav-links al body evita el bug de position:fixed anidado
+    // (Chrome/Safari tratan backdrop-filter y fixed parents como containing block)
+    const mq = window.matchMedia('(max-width: 900px)');
+    function relocate(e) {
+      if (e.matches) {
+        if (navLinks.parentElement !== document.body) document.body.appendChild(navLinks);
+      } else {
+        if (navLinks.parentElement !== nav) nav.insertBefore(navLinks, hamburger);
+      }
+    }
+    mq.addEventListener('change', relocate);
+    relocate(mq);
+
+    let _scrollY = 0;
+    function openMenu() {
+      _scrollY = window.scrollY;
+      navLinks.classList.add('open');
+      hamburger.classList.add('open');
+      // Bloqueo de scroll compatible con iOS Safari
+      document.body.style.top = `-${_scrollY}px`;
+      document.body.classList.add('menu-open');
+    }
+    function closeMenu() {
+      navLinks.classList.remove('open');
+      hamburger.classList.remove('open');
+      document.body.classList.remove('menu-open');
+      document.body.style.top = '';
+      window.scrollTo(0, _scrollY);
+    }
+
     hamburger.addEventListener('click', () => {
-      navLinks.classList.toggle('open');
-      hamburger.classList.toggle('open');
+      navLinks.classList.contains('open') ? closeMenu() : openMenu();
     });
-    // Close on link click
-    navLinks.querySelectorAll('a').forEach(a => {
-      a.addEventListener('click', () => navLinks.classList.remove('open'));
-    });
+    const closeBtn = navLinks.querySelector('.nav-close-btn');
+    if (closeBtn) closeBtn.addEventListener('click', closeMenu);
   }
 
-  // Lang buttons
   document.querySelectorAll('.lang-btn').forEach(btn => {
     btn.addEventListener('click', () => applyLang(btn.dataset.lang));
   });

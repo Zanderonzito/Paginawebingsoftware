@@ -1,0 +1,1863 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Admin — Mujer Cobra</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --petrol:     #0b2a2b;
+      --petrol-mid: #103b3c;
+      --petrol-light:#164849;
+      --copper:     #c97a4b;
+      --copper-bright:#e09065;
+      --ivory:      #f3ece1;
+      --ivory-dim:  rgba(243,236,225,0.55);
+      --ivory-faint:rgba(243,236,225,0.15);
+      --border:     rgba(201,122,75,0.2);
+      --border-hover:rgba(201,122,75,0.5);
+      --font-display:'Cormorant Garamond', serif;
+      --font-body:  'Outfit', sans-serif;
+      --red: #c0392b;
+      --green: #27ae60;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:var(--petrol); color:var(--ivory); font-family:var(--font-body); font-weight:300; min-height:100vh; }
+
+    /* ── LOGIN ── */
+    #login-screen {
+      display:flex; align-items:center; justify-content:center;
+      min-height:100vh; padding:20px;
+    }
+    .login-box {
+      background:var(--petrol-mid); border:1px solid var(--border);
+      padding:48px 40px; width:100%; max-width:400px;
+    }
+    .login-logo {
+      font-family:var(--font-display); font-size:1.4rem; letter-spacing:0.3em;
+      color:var(--copper-bright); text-align:center; margin-bottom:8px;
+    }
+    .login-sub {
+      font-size:0.7rem; letter-spacing:0.25em; text-transform:uppercase;
+      color:var(--ivory-dim); text-align:center; margin-bottom:36px;
+    }
+    .field { display:flex; flex-direction:column; gap:6px; margin-bottom:16px; }
+    .field label { font-size:0.72rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--copper); }
+    .field input {
+      background:var(--petrol); border:1px solid var(--border);
+      color:var(--ivory); padding:12px 14px; font-family:var(--font-body);
+      font-size:0.9rem; outline:none; transition:border-color 0.3s;
+    }
+    .field input:focus { border-color:var(--copper); }
+    .btn-primary {
+      width:100%; background:var(--copper); color:var(--petrol);
+      border:none; padding:13px; font-family:var(--font-body);
+      font-size:0.8rem; letter-spacing:0.25em; text-transform:uppercase;
+      font-weight:500; cursor:pointer; transition:background 0.3s; margin-top:8px;
+    }
+    .btn-primary:hover { background:var(--copper-bright); }
+    .btn-primary:disabled { opacity:0.5; cursor:not-allowed; }
+    #login-error { color:#e74c3c; font-size:0.8rem; margin-top:10px; text-align:center; display:none; }
+
+    /* ── PANEL PRINCIPAL ── */
+    #admin-panel { display:none; }
+
+    /* Sidebar */
+    .layout { display:grid; grid-template-columns:220px 1fr; min-height:100vh; }
+    .sidebar {
+      background:var(--petrol-mid); border-right:1px solid var(--border);
+      padding:32px 0; display:flex; flex-direction:column;
+      position:sticky; top:0; height:100vh;
+    }
+    .sidebar-logo {
+      font-family:var(--font-display); font-size:1rem; letter-spacing:0.3em;
+      color:var(--copper-bright); padding:0 24px 28px; border-bottom:1px solid var(--border);
+    }
+    .sidebar-logo span { display:block; font-size:0.6rem; font-family:var(--font-body); letter-spacing:0.2em; color:var(--ivory-dim); margin-top:4px; }
+    .nav-menu { padding:20px 0; flex:1; }
+    .nav-item {
+      display:flex; align-items:center; gap:10px;
+      padding:12px 24px; font-size:0.85rem; cursor:pointer;
+      color:var(--ivory-dim); transition:all 0.2s; border-left:2px solid transparent;
+    }
+    .nav-item:hover { color:var(--ivory); background:var(--ivory-faint); }
+    .nav-item.active { color:var(--copper-bright); border-left-color:var(--copper); background:var(--ivory-faint); }
+    .nav-icon { font-size:1rem; width:20px; text-align:center; }
+    .sidebar-footer { padding:20px 24px; border-top:1px solid var(--border); }
+    .btn-logout {
+      width:100%; background:transparent; border:1px solid var(--border);
+      color:var(--ivory-dim); padding:10px; font-size:0.75rem;
+      letter-spacing:0.2em; text-transform:uppercase; cursor:pointer;
+      transition:all 0.3s; font-family:var(--font-body);
+    }
+    .btn-logout:hover { border-color:var(--copper); color:var(--copper); }
+
+    /* Main content */
+    .main { padding:40px; overflow-y:auto; }
+    .page-title {
+      font-family:var(--font-display); font-size:2rem; font-weight:300;
+      color:var(--ivory); margin-bottom:4px;
+    }
+    .page-title em { color:var(--copper-bright); font-style:italic; }
+    .page-sub { font-size:0.8rem; color:var(--ivory-dim); margin-bottom:36px; letter-spacing:0.05em; }
+
+    /* Secciones */
+    .section { display:none; }
+    .section.active { display:block; }
+
+    /* Stats */
+    .stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:36px; }
+    .stat-card {
+      background:var(--petrol-mid); border:1px solid var(--border);
+      padding:24px; text-align:center;
+    }
+    .stat-num { font-family:var(--font-display); font-size:2.5rem; color:var(--copper-bright); }
+    .stat-lbl { font-size:0.7rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--ivory-dim); margin-top:6px; }
+
+    /* Tabla */
+    .table-header {
+      display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;
+    }
+    .table-header h3 { font-family:var(--font-display); font-size:1.3rem; font-weight:300; }
+    .btn-add {
+      background:var(--copper); color:var(--petrol); border:none;
+      padding:10px 20px; font-size:0.75rem; letter-spacing:0.2em;
+      text-transform:uppercase; cursor:pointer; font-family:var(--font-body);
+      font-weight:500; transition:background 0.3s;
+    }
+    .btn-add:hover { background:var(--copper-bright); }
+    .table-wrap { overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; }
+    th {
+      text-align:left; padding:12px 16px; font-size:0.68rem;
+      letter-spacing:0.2em; text-transform:uppercase; color:var(--copper);
+      border-bottom:1px solid var(--border); font-weight:400;
+    }
+    td { padding:14px 16px; font-size:0.85rem; border-bottom:1px solid var(--ivory-faint); vertical-align:middle; }
+    tr:hover td { background:var(--ivory-faint); }
+    .td-img { width:52px; height:52px; object-fit:cover; border:1px solid var(--border); }
+    .td-img-placeholder {
+      width:52px; height:52px; background:var(--petrol-light);
+      border:1px dashed var(--border); display:flex; align-items:center; justify-content:center;
+      font-size:1.2rem; opacity:0.5;
+    }
+    .badge {
+      display:inline-block; padding:3px 10px; font-size:0.65rem;
+      letter-spacing:0.15em; text-transform:uppercase;
+    }
+    .badge-on  { background:rgba(39,174,96,0.15); color:#2ecc71; border:1px solid rgba(39,174,96,0.3); }
+    .badge-off { background:rgba(192,57,43,0.15); color:#e74c3c; border:1px solid rgba(192,57,43,0.3); }
+    .btn-edit, .btn-delete {
+      padding:6px 12px; font-size:0.7rem; letter-spacing:0.1em;
+      cursor:pointer; font-family:var(--font-body); transition:all 0.2s;
+    }
+    .btn-edit { background:transparent; border:1px solid var(--border); color:var(--ivory-dim); }
+    .btn-edit:hover { border-color:var(--copper); color:var(--copper); }
+    .btn-delete { background:transparent; border:1px solid rgba(192,57,43,0.3); color:rgba(231,76,60,0.6); margin-left:6px; }
+    .btn-delete:hover { border-color:#e74c3c; color:#e74c3c; }
+
+    /* Modal producto */
+    .modal-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,0.85);
+      z-index:1000; display:none; align-items:center; justify-content:center; padding:20px;
+    }
+    .modal-overlay.open { display:flex; }
+    .modal-box {
+      background:var(--petrol-mid); border:1px solid var(--border);
+      padding:40px; width:100%; max-width:600px; max-height:90vh; overflow-y:auto;
+      position:relative;
+    }
+    .modal-title { font-family:var(--font-display); font-size:1.5rem; margin-bottom:24px; }
+    .modal-close {
+      position:absolute; top:16px; right:16px; background:none; border:none;
+      color:var(--copper); font-size:1.3rem; cursor:pointer;
+    }
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .form-grid .full { grid-column:1/-1; }
+    .form-field { display:flex; flex-direction:column; gap:6px; }
+    .form-field label { font-size:0.7rem; letter-spacing:0.18em; text-transform:uppercase; color:var(--copper); }
+    .form-field input, .form-field select, .form-field textarea {
+      background:var(--petrol); border:1px solid var(--border);
+      color:var(--ivory); padding:10px 12px; font-family:var(--font-body);
+      font-size:0.88rem; outline:none; transition:border-color 0.3s;
+    }
+    .form-field input:focus, .form-field select:focus, .form-field textarea:focus { border-color:var(--copper); }
+    .form-field textarea { resize:vertical; min-height:80px; }
+    .form-field select option { background:var(--petrol-mid); }
+    .form-actions { display:flex; gap:12px; margin-top:24px; justify-content:flex-end; }
+    .btn-cancel {
+      background:transparent; border:1px solid var(--border); color:var(--ivory-dim);
+      padding:10px 24px; font-size:0.75rem; letter-spacing:0.2em; text-transform:uppercase;
+      cursor:pointer; font-family:var(--font-body); transition:all 0.3s;
+    }
+    .btn-cancel:hover { border-color:var(--copper); color:var(--copper); }
+
+    /* Preview imagen */
+    .img-preview {
+      width:100%; height:140px; object-fit:cover;
+      border:1px solid var(--border); margin-top:8px; display:none;
+    }
+    .img-hint { font-size:0.72rem; color:var(--ivory-dim); margin-top:4px; }
+
+    /* Corrección monetaria */
+    .ipc-card {
+      background:var(--petrol-mid); border:1px solid var(--border);
+      padding:28px; margin-bottom:20px;
+    }
+    .ipc-card h3 { font-family:var(--font-display); font-size:1.2rem; margin-bottom:16px; color:var(--copper-bright); }
+    .ipc-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:20px; }
+    .ipc-input-group { display:flex; flex-direction:column; gap:6px; }
+    .ipc-input-group label { font-size:0.68rem; letter-spacing:0.18em; text-transform:uppercase; color:var(--copper); }
+    .ipc-input-group input {
+      background:var(--petrol); border:1px solid var(--border); color:var(--ivory);
+      padding:10px 12px; font-family:var(--font-body); font-size:0.88rem; outline:none;
+    }
+    .ipc-result-table { width:100%; border-collapse:collapse; margin-top:16px; }
+    .ipc-result-table th, .ipc-result-table td { padding:10px 14px; border-bottom:1px solid var(--ivory-faint); font-size:0.83rem; }
+    .ipc-result-table th { font-size:0.68rem; letter-spacing:0.15em; text-transform:uppercase; color:var(--copper); font-weight:400; }
+    .highlight { color:var(--copper-bright); font-weight:500; }
+
+    /* Toast */
+    #toast {
+      position:fixed; bottom:28px; right:28px; z-index:9999;
+      background:var(--petrol-light); border:1px solid var(--copper);
+      color:var(--ivory); padding:14px 20px; font-size:0.85rem;
+      transform:translateY(80px); opacity:0; transition:all 0.4s;
+      pointer-events:none;
+    }
+    #toast.show { transform:translateY(0); opacity:1; }
+
+    /* Pedidos */
+    .estado-badge {
+      display:inline-block; padding:3px 10px; font-size:0.65rem;
+      letter-spacing:0.12em; text-transform:uppercase;
+    }
+    .estado-pendiente  { background:rgba(243,156,18,0.15); color:#f39c12; border:1px solid rgba(243,156,18,0.3); }
+    .estado-pagado     { background:rgba(39,174,96,0.15);  color:#2ecc71; border:1px solid rgba(39,174,96,0.3); }
+    .estado-cancelado  { background:rgba(192,57,43,0.15);  color:#e74c3c; border:1px solid rgba(192,57,43,0.3); }
+    .estado-preparando { background:rgba(52,152,219,0.15); color:#3498db; border:1px solid rgba(52,152,219,0.3); }
+
+    @media (max-width:768px) {
+      .layout { grid-template-columns:1fr; }
+      .sidebar { position:relative; height:auto; }
+      .stats-grid { grid-template-columns:1fr; }
+      .ipc-grid { grid-template-columns:1fr; }
+      .form-grid { grid-template-columns:1fr; }
+    }
+
+    /* ── Página de Inicio CMS ── */
+    .inicio-row {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:14px 18px; background:var(--petrol-mid); border:1px solid var(--border);
+      margin-bottom:4px; gap:16px; transition:border-color 0.2s;
+    }
+    .inicio-row:hover { border-color:var(--border-hover); }
+    .inicio-row-info { display:flex; align-items:center; gap:12px; min-width:0; }
+    .inicio-row-name { font-size:0.88rem; color:var(--ivory); white-space:nowrap; }
+    .inicio-row-acciones { display:flex; align-items:center; gap:6px; flex-shrink:0; flex-wrap:wrap; }
+    .btn-orden {
+      width:28px; height:28px; background:transparent; border:1px solid var(--border);
+      color:var(--ivory-dim); cursor:pointer; font-size:0.9rem;
+      transition:all 0.2s; font-family:var(--font-body); padding:0; line-height:1;
+    }
+    .btn-orden:hover:not(:disabled) { border-color:var(--copper); color:var(--copper); }
+    .btn-orden:disabled { opacity:0.25; cursor:not-allowed; }
+    .btn-toggle {
+      padding:5px 11px; font-size:0.7rem; letter-spacing:0.1em; cursor:pointer;
+      font-family:var(--font-body); transition:all 0.2s; background:transparent;
+    }
+    .btn-toggle-on  { border:1px solid rgba(39,174,96,0.5);  color:#2ecc71; }
+    .btn-toggle-off { border:1px solid rgba(192,57,43,0.4);  color:rgba(231,76,60,0.85); }
+    .btn-toggle-on:hover  { background:rgba(39,174,96,0.12); }
+    .btn-toggle-off:hover { background:rgba(192,57,43,0.1); }
+    .form-section-title {
+      font-size:0.65rem; letter-spacing:0.22em; text-transform:uppercase;
+      color:var(--copper); border-bottom:1px solid var(--border);
+      padding-bottom:7px; margin-top:6px; grid-column:1/-1;
+    }
+    .form-pillar {
+      background:var(--petrol); border:1px solid var(--border);
+      padding:14px 16px; margin-bottom:6px;
+    }
+    .form-pillar-label {
+      font-size:0.62rem; letter-spacing:0.2em; text-transform:uppercase;
+      color:var(--copper-bright); margin-bottom:12px; display:block;
+    }
+    .fi-input {
+      width:100%; background:var(--petrol); border:1px solid var(--border);
+      color:var(--ivory); padding:9px 10px; font-family:var(--font-body);
+      font-size:0.84rem; outline:none; transition:border-color 0.3s;
+    }
+    .fi-input:focus { border-color:var(--copper); }
+    .fi-label { font-size:0.6rem; letter-spacing:0.16em; text-transform:uppercase; color:var(--copper); display:block; margin-bottom:4px; }
+    .fi-group { margin-bottom:4px; }
+    .fi-row-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:6px; }
+    .fi-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:6px; }
+    @media (max-width:768px) {
+      .inicio-row { flex-direction:column; align-items:flex-start; }
+      .fi-row-3, .fi-row-2 { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── LOGIN ─────────────────────────────────────────────────── -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">MUJER COBRA</div>
+    <div class="login-sub">Panel de Administración</div>
+    <div class="field">
+      <label>Correo electrónico</label>
+      <input type="email" id="login-email" placeholder="tu@correo.cl" autocomplete="email">
+    </div>
+    <div class="field">
+      <label>Contraseña</label>
+      <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn-primary" id="btn-login">Ingresar al panel</button>
+    <div id="login-error"></div>
+  </div>
+</div>
+
+<!-- ── PANEL PRINCIPAL ────────────────────────────────────────── -->
+<div id="admin-panel">
+  <div class="layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        MUJER COBRA
+        <span>Panel de administración</span>
+      </div>
+      <nav class="nav-menu">
+        <div class="nav-item active" onclick="irA('resumen')">
+          <span class="nav-icon">📊</span> Resumen
+        </div>
+        <div class="nav-item" onclick="irA('productos')">
+          <span class="nav-icon">🪙</span> Productos
+        </div>
+        <div class="nav-item" onclick="irA('pedidos')">
+          <span class="nav-icon">📦</span> Pedidos
+        </div>
+        <div class="nav-item" onclick="irA('categorias')">
+          <span class="nav-icon">🏷️</span> Categorías
+        </div>
+        <div class="nav-item" onclick="irA('monetario')">
+          <span class="nav-icon">📈</span> Corrección Monetaria
+        </div>
+        <div class="nav-item" onclick="irA('inicio')">
+          <span class="nav-icon">🏠</span> Página de Inicio
+        </div>
+        <div class="nav-item" onclick="irA('estadisticas')">
+          <span class="nav-icon">📊</span> Estadísticas de Ventas
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <div style="font-size:0.72rem;color:var(--ivory-dim);margin-bottom:10px;" id="user-email-display"></div>
+        <button class="btn-logout" onclick="cerrarSesion()">Cerrar sesión</button>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+
+      <!-- RESUMEN -->
+      <div class="section active" id="sec-resumen">
+        <div class="page-title">Bienvenida, <em>Bárbara</em></div>
+        <div class="page-sub">Resumen general de tu tienda</div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-num" id="stat-productos">—</div>
+            <div class="stat-lbl">Productos activos</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="stat-pedidos">—</div>
+            <div class="stat-lbl">Pedidos totales</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="stat-pendientes">—</div>
+            <div class="stat-lbl">Pedidos pendientes</div>
+          </div>
+        </div>
+        <div class="ipc-card">
+          <h3>📦 Últimos pedidos</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Código</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead>
+              <tbody id="tabla-pedidos-resumen"><tr><td colspan="4" style="color:var(--ivory-dim);text-align:center;padding:20px;">Cargando…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRODUCTOS -->
+      <div class="section" id="sec-productos">
+        <div class="page-title">Gestión de <em>Productos</em></div>
+        <div class="page-sub">Agrega, edita o desactiva productos de tu catálogo</div>
+        <div class="table-header">
+          <h3>Catálogo actual</h3>
+          <button class="btn-add" onclick="abrirModalProducto()">+ Agregar producto</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Foto</th><th>Nombre</th><th>Categoría</th>
+                <th>Precio CLP</th><th>Stock</th><th>Estado</th><th>Tendencia</th><th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-productos"><tr><td colspan="7" style="color:var(--ivory-dim);text-align:center;padding:20px;">Cargando…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PEDIDOS -->
+      <div class="section" id="sec-pedidos">
+        <div class="page-title">Gestión de <em>Pedidos</em></div>
+        <div class="page-sub">Revisa y actualiza el estado de cada pedido</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Código</th><th>Cliente</th><th>Email</th><th>Total</th><th>Estado</th><th>Fecha</th><th>Acción</th></tr>
+            </thead>
+            <tbody id="tabla-pedidos"><tr><td colspan="7" style="color:var(--ivory-dim);text-align:center;padding:20px;">Cargando…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CATEGORÍAS -->
+      <div class="section" id="sec-categorias">
+        <div class="page-title">Gestión de <em>Categorías</em></div>
+        <div class="page-sub">Agrega, edita o desactiva las categorías que aparecen en la tienda</div>
+        <div class="table-header">
+          <h3>Categorías actuales</h3>
+          <button class="btn-add" onclick="abrirModalCategoria()">+ Agregar categoría</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Nombre ES</th><th>Nombre EN</th><th>Orden</th><th>Estado</th><th>Acciones</th></tr>
+            </thead>
+            <tbody id="tabla-categorias"><tr><td colspan="5" style="color:var(--ivory-dim);text-align:center;padding:20px;">Cargando…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CORRECCIÓN MONETARIA -->
+      <div class="section" id="sec-monetario">
+        <div class="page-title">Corrección <em>Monetaria</em></div>
+        <div class="page-sub">Proyección del valor real de los costos ajustados por IPC del Banco Central de Chile</div>
+
+        <div class="ipc-card">
+          <h3>⚙️ Parámetros</h3>
+          <div class="ipc-grid">
+            <div class="ipc-input-group">
+              <label>Costo base anual (CLP)</label>
+              <input type="number" id="ipc-costo" value="10000" min="0">
+            </div>
+            <div class="ipc-input-group">
+              <label>Año base</label>
+              <input type="number" id="ipc-anio-base" value="2025" min="2020">
+            </div>
+            <div class="ipc-input-group">
+              <label>Años a proyectar</label>
+              <input type="number" id="ipc-anios" value="4" min="1" max="10">
+            </div>
+          </div>
+          <div class="ipc-grid">
+            <div class="ipc-input-group">
+              <label>IPC 2025 (%)</label>
+              <input type="number" id="ipc-2025" value="4.5" step="0.1">
+            </div>
+            <div class="ipc-input-group">
+              <label>IPC 2026 (%)</label>
+              <input type="number" id="ipc-2026" value="3.8" step="0.1">
+            </div>
+            <div class="ipc-input-group">
+              <label>IPC 2027 (%)</label>
+              <input type="number" id="ipc-2027" value="3.5" step="0.1">
+            </div>
+          </div>
+          <button class="btn-primary" style="max-width:200px;margin-top:8px;" onclick="calcularIPC()">Calcular</button>
+        </div>
+
+        <div class="ipc-card">
+          <h3>📊 Proyección ajustada por IPC</h3>
+          <table class="ipc-result-table">
+            <thead>
+              <tr><th>Año</th><th>IPC aplicado</th><th>Factor acumulado</th><th>Costo nominal</th><th>Costo real ajustado</th><th>Variación</th></tr>
+            </thead>
+            <tbody id="tabla-ipc"></tbody>
+          </table>
+          <p style="font-size:0.72rem;color:var(--ivory-dim);margin-top:16px;">
+            Tasas IPC basadas en proyecciones del Banco Central de Chile. El costo real ajustado refleja el poder adquisitivo equivalente en el año base.
+          </p>
+        </div>
+
+        <div class="ipc-card">
+          <h3>💰 Valor de mercado del desarrollo</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <div>
+              <div style="font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--copper);margin-bottom:8px;">Horas de desarrollo</div>
+              <div style="font-family:var(--font-display);font-size:2rem;color:var(--copper-bright);">235 hrs</div>
+            </div>
+            <div>
+              <div style="font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--copper);margin-bottom:8px;">Tarifa de mercado</div>
+              <div style="font-family:var(--font-display);font-size:2rem;color:var(--copper-bright);">$9.500/hr</div>
+            </div>
+            <div>
+              <div style="font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--copper);margin-bottom:8px;">Valor total de mercado</div>
+              <div style="font-family:var(--font-display);font-size:2rem;color:var(--copper-bright);">$2.230.000</div>
+            </div>
+            <div>
+              <div style="font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--copper);margin-bottom:8px;">Tu costo real anual</div>
+              <div style="font-family:var(--font-display);font-size:2rem;color:#2ecc71;">$10.000</div>
+            </div>
+          </div>
+          <div style="margin-top:20px;padding:16px;background:var(--petrol);border:1px solid rgba(39,174,96,0.3);">
+            <div style="font-size:0.72rem;letter-spacing:0.15em;text-transform:uppercase;color:#2ecc71;margin-bottom:6px;">Ahorro total primer año</div>
+            <div style="font-family:var(--font-display);font-size:1.8rem;color:#2ecc71;">$2.220.000 CLP</div>
+            <div style="font-size:0.8rem;color:var(--ivory-dim);margin-top:4px;">vs. desarrollo a tarifa de mercado con infraestructura propia</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PÁGINA DE INICIO -->
+      <div class="section" id="sec-inicio">
+        <div class="page-title">Página de <em>Inicio</em></div>
+        <div class="page-sub">Edita, reordena y activa las secciones de mujercobra.cl · Los cambios se reflejan al recargar la página</div>
+        <div class="table-header">
+          <h3>Secciones del sitio</h3>
+        </div>
+        <div id="lista-inicio">
+          <p style="color:var(--ivory-dim);text-align:center;padding:30px;">Cargando…</p>
+        </div>
+      </div>
+
+      <!-- ESTADÍSTICAS DE VENTAS -->
+      <div class="section" id="sec-estadisticas">
+        <div class="page-title">Estadísticas de <em>Ventas</em></div>
+        <div class="page-sub">Productos más vendidos según los pedidos registrados</div>
+        <div id="stats-contenido">
+          <p style="color:var(--ivory-dim);text-align:center;padding:30px;">Cargando estadísticas…</p>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ── MODAL INICIO ───────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-inicio">
+  <div class="modal-box" style="max-width:700px;">
+    <button class="modal-close" onclick="cerrarModalInicio()">✕</button>
+    <div class="modal-title" id="modal-inicio-titulo">Editar sección</div>
+    <div id="modal-inicio-form" style="margin-top:4px;">
+      <!-- Formulario generado dinámicamente según el tipo de sección -->
+    </div>
+    <div id="modal-inicio-error" style="color:#e74c3c;font-size:0.8rem;margin-top:12px;display:none;"></div>
+    <div class="form-actions">
+      <button class="btn-cancel" onclick="cerrarModalInicio()">Cancelar</button>
+      <button class="btn-primary" style="max-width:180px;" id="btn-guardar-inicio" onclick="guardarInicio()">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL CATEGORÍA ────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-categoria">
+  <div class="modal-box" style="max-width:440px;">
+    <button class="modal-close" onclick="cerrarModalCategoria()">✕</button>
+    <div class="modal-title" id="modal-cat-titulo">Nueva categoría</div>
+    <input type="hidden" id="cat-id">
+    <div class="form-grid">
+      <div class="form-field">
+        <label>Nombre en español *</label>
+        <input type="text" id="cat-nombre-es" placeholder="Ej: Collares" oninput="generarSlug(this.value)">
+      </div>
+      <div class="form-field">
+        <label>Nombre en inglés</label>
+        <input type="text" id="cat-nombre-en" placeholder="Ej: Necklaces">
+      </div>
+      <div class="form-field">
+        <label>Slug (URL) *</label>
+        <input type="text" id="cat-slug" placeholder="Se genera automáticamente" readonly style="opacity:0.6;cursor:not-allowed;">
+      </div>
+      <div class="form-field">
+        <label>Orden en menú</label>
+        <input type="number" id="cat-orden" value="1" min="1">
+      </div>
+      <div class="form-field">
+        <label>Estado</label>
+        <select id="cat-activa">
+          <option value="true">Activa (visible)</option>
+          <option value="false">Inactiva (oculta)</option>
+        </select>
+      </div>
+    </div>
+    <div id="modal-cat-error" style="color:#e74c3c;font-size:0.8rem;margin-top:12px;display:none;"></div>
+    <div class="form-actions">
+      <button class="btn-cancel" onclick="cerrarModalCategoria()">Cancelar</button>
+      <button class="btn-primary" style="max-width:160px;" id="btn-guardar-cat" onclick="guardarCategoria()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL PRODUCTO ─────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-producto">
+  <div class="modal-box">
+    <button class="modal-close" onclick="cerrarModal()">✕</button>
+    <div class="modal-title" id="modal-prod-titulo">Nuevo producto</div>
+    <input type="hidden" id="prod-id">
+    <div class="form-grid">
+      <div class="form-field">
+        <label>Nombre en español *</label>
+        <input type="text" id="prod-nombre-es" placeholder="Ej: Aros Corazón Capim">
+      </div>
+      <div class="form-field">
+        <label>Nombre en inglés</label>
+        <input type="text" id="prod-nombre-en" placeholder="Ej: Capim Heart Earrings">
+      </div>
+      <div class="form-field full">
+        <label>Descripción en español</label>
+        <textarea id="prod-desc-es" placeholder="Descripción del producto…"></textarea>
+      </div>
+      <div class="form-field full">
+        <label>Descripción en inglés</label>
+        <textarea id="prod-desc-en" placeholder="Product description…"></textarea>
+      </div>
+      <div class="form-field">
+        <label>Precio CLP *</label>
+        <input type="number" id="prod-precio-clp" placeholder="35000" min="0">
+      </div>
+      <div class="form-field">
+        <label>Precio USD</label>
+        <input type="number" id="prod-precio-usd" placeholder="37.00" step="0.01" min="0">
+      </div>
+      <div class="form-field">
+        <label>Categoría *</label>
+        <select id="prod-categoria"></select>
+      </div>
+      <div class="form-field">
+        <label>Stock *</label>
+        <input type="number" id="prod-stock" placeholder="1" min="0">
+      </div>
+      <div class="form-field full">
+        <label>Foto del producto</label>
+        <div id="upload-zone" style="border:2px dashed var(--border);padding:24px;text-align:center;cursor:pointer;transition:border-color 0.3s;position:relative;" onclick="document.getElementById('file-input').click()" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropFile(event)">
+          <input type="file" id="file-input" accept="image/*" style="display:none" onchange="subirFoto(this.files[0])">
+          <div id="upload-estado">
+            <div style="font-size:2rem;margin-bottom:8px;">📸</div>
+            <div style="font-size:0.85rem;color:var(--copper-bright);">Haz clic para elegir una foto</div>
+            <div style="font-size:0.72rem;color:var(--ivory-dim);margin-top:4px;">o arrastra la imagen aquí · JPG, PNG, WEBP</div>
+          </div>
+        </div>
+        <div id="upload-progreso" style="display:none;margin-top:10px;">
+          <div style="height:3px;background:var(--petrol-light);position:relative;overflow:hidden;">
+            <div id="barra-progreso-upload" style="height:100%;background:var(--copper);width:0%;transition:width 0.3s;"></div>
+          </div>
+          <div id="upload-texto" style="font-size:0.75rem;color:var(--ivory-dim);margin-top:6px;text-align:center;">Subiendo…</div>
+        </div>
+        <img class="img-preview" id="img-preview-el" alt="Preview" style="margin-top:10px;">
+        <input type="hidden" id="prod-imagen-url">
+      </div>
+      <div class="form-field">
+        <label>Destacado</label>
+        <select id="prod-destacado">
+          <option value="false">No</option>
+          <option value="true">Sí</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Disponible</label>
+        <select id="prod-disponible">
+          <option value="true">Sí</option>
+          <option value="false">No (oculto)</option>
+        </select>
+      </div>
+    </div>
+    <div id="modal-error" style="color:#e74c3c;font-size:0.8rem;margin-top:12px;display:none;"></div>
+    <div class="form-actions">
+      <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn-primary" style="max-width:160px;" id="btn-guardar" onclick="guardarProducto()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script>
+/* ══════════════════════════════════════════════════════════════
+   PANEL ADMIN — Mujer Cobra
+══════════════════════════════════════════════════════════════ */
+
+let SESSION = null;
+let CATEGORIAS = [];
+let PRODUCTOS = [];
+let PEDIDOS = [];
+
+/* ── AUTH ── */
+document.getElementById('login-pass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') iniciarSesion();
+});
+document.getElementById('btn-login').addEventListener('click', iniciarSesion);
+
+// Verificar rol administrador contra tabla roles_asignados
+async function verificarRolAdmin(userId) {
+  const { data, error } = await supabaseClient
+    .from('roles_asignados')
+    .select('rol')
+    .eq('user_id', userId)
+    .single();
+  if (error || !data) return false;
+  return data.rol === 'administrador';
+}
+
+// Restaurar sesión persistida si ya es admin
+(async function checkPersistedSession() {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session) return;
+  const esAdmin = await verificarRolAdmin(session.user.id);
+  if (!esAdmin) { await supabaseClient.auth.signOut(); return; }
+  SESSION = session;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('admin-panel').style.display = 'block';
+  document.getElementById('user-email-display').textContent = session.user.email;
+  cargarTodo();
+})();
+
+async function iniciarSesion() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-error');
+  const btn   = document.getElementById('btn-login');
+
+  errEl.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Ingresando…';
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
+
+  if (error) {
+    errEl.textContent = 'Correo o contraseña incorrectos.';
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Ingresar al panel';
+    return;
+  }
+
+  const esAdmin = await verificarRolAdmin(data.session.user.id);
+  if (!esAdmin) {
+    await supabaseClient.auth.signOut();
+    errEl.textContent = 'No tienes permisos de administrador.';
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Ingresar al panel';
+    return;
+  }
+
+  SESSION = data.session;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('admin-panel').style.display = 'block';
+  document.getElementById('user-email-display').textContent = email;
+  cargarTodo();
+}
+
+async function cerrarSesion() {
+  await supabaseClient.auth.signOut();
+  location.reload();
+}
+
+/* ── NAVEGACIÓN ── */
+function irA(seccion) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('sec-' + seccion).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+/* ── CARGA INICIAL ── */
+async function cargarTodo() {
+  await Promise.all([cargarCategorias(), cargarProductos(), cargarPedidos(), cargarInicio(), cargarEstadisticas()]);
+  actualizarStats();
+  renderTablaCategorias();
+  calcularIPC();
+}
+
+async function cargarCategorias() {
+  const { data } = await supabaseClient.from('categorias').select('*').order('orden');
+  CATEGORIAS = data || [];
+  const sel = document.getElementById('prod-categoria');
+  sel.innerHTML = CATEGORIAS.map(c => `<option value="${c.id}">${c.nombre_es}</option>`).join('');
+}
+
+async function cargarProductos() {
+  const { data } = await supabaseClient
+    .from('productos')
+    .select('*, categorias(nombre_es)')
+    .order('creado_en', { ascending: false });
+  PRODUCTOS = data || [];
+  renderTablaProductos();
+}
+
+async function cargarPedidos() {
+  const { data } = await supabaseClient
+    .from('pedidos')
+    .select('*')
+    .order('creado_en', { ascending: false });
+  PEDIDOS = data || [];
+  renderTablaPedidos();
+  renderPedidosResumen();
+}
+
+/* ── STATS ── */
+function actualizarStats() {
+  const activos    = PRODUCTOS.filter(p => p.disponible).length;
+  const pendientes = PEDIDOS.filter(p => p.estado === 'pendiente').length;
+  document.getElementById('stat-productos').textContent  = activos;
+  document.getElementById('stat-pedidos').textContent    = PEDIDOS.length;
+  document.getElementById('stat-pendientes').textContent = pendientes;
+}
+
+/* ── TABLA PRODUCTOS ── */
+function renderTablaProductos() {
+  const tbody = document.getElementById('tabla-productos');
+  if (PRODUCTOS.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="color:var(--ivory-dim);text-align:center;padding:20px;">Sin productos aún</td></tr>';
+    return;
+  }
+  tbody.innerHTML = PRODUCTOS.map(p => {
+    const img = p.imagenes && p.imagenes.length > 0 ? p.imagenes[0] : null;
+    const imgHtml = img
+      ? `<img class="td-img" src="${img}" alt="${p.nombre_es}">`
+      : `<div class="td-img-placeholder">🪙</div>`;
+    const estado = p.disponible
+      ? '<span class="badge badge-on">Activo</span>'
+      : '<span class="badge badge-off">Oculto</span>';
+    const tendenciaBadge = p.tendencia
+      ? `<span class="badge badge-on" onclick="toggleTendencia(${p.id},false)" style="cursor:pointer;user-select:none;" title="Quitar de tendencias">Sí</span>`
+      : `<span class="badge badge-off" onclick="toggleTendencia(${p.id},true)" style="cursor:pointer;user-select:none;" title="Marcar como tendencia">No</span>`;
+    return `<tr>
+      <td>${imgHtml}</td>
+      <td style="max-width:200px;">${p.nombre_es}</td>
+      <td>${p.categorias?.nombre_es || '—'}</td>
+      <td>$${Number(p.precio_clp).toLocaleString('es-CL')}</td>
+      <td>${p.stock}</td>
+      <td>${estado}</td>
+      <td>${tendenciaBadge}</td>
+      <td>
+        <button class="btn-edit" onclick="editarProducto(${p.id})">Editar</button>
+        <button class="btn-delete" onclick="eliminarProducto(${p.id})">Eliminar</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+/* ── TABLA PEDIDOS ── */
+function renderTablaPedidos() {
+  const tbody = document.getElementById('tabla-pedidos');
+  if (PEDIDOS.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="color:var(--ivory-dim);text-align:center;padding:20px;">Sin pedidos aún</td></tr>';
+    return;
+  }
+  tbody.innerHTML = PEDIDOS.map(p => {
+    const fecha = new Date(p.creado_en).toLocaleDateString('es-CL');
+    return `<tr>
+      <td style="font-family:var(--font-display);">${p.codigo || '—'}</td>
+      <td>${p.cliente_nombre}</td>
+      <td style="font-size:0.78rem;color:var(--ivory-dim);">${p.cliente_email}</td>
+      <td>$${Number(p.total).toLocaleString('es-CL')}</td>
+      <td><span class="estado-badge estado-${p.estado}">${p.estado}</span></td>
+      <td style="font-size:0.78rem;color:var(--ivory-dim);">${fecha}</td>
+      <td>
+        <select onchange="cambiarEstadoPedido(${p.id}, this.value)" style="background:var(--petrol);border:1px solid var(--border);color:var(--ivory);padding:5px 8px;font-size:0.75rem;cursor:pointer;">
+          <option value="pendiente"   ${p.estado==='pendiente'   ?'selected':''}>Pendiente</option>
+          <option value="pagado"      ${p.estado==='pagado'      ?'selected':''}>Pagado</option>
+          <option value="preparando"  ${p.estado==='preparando'  ?'selected':''}>Preparando</option>
+          <option value="enviado"     ${p.estado==='enviado'     ?'selected':''}>Enviado</option>
+          <option value="entregado"   ${p.estado==='entregado'   ?'selected':''}>Entregado</option>
+          <option value="cancelado"   ${p.estado==='cancelado'   ?'selected':''}>Cancelado</option>
+        </select>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderPedidosResumen() {
+  const tbody = document.getElementById('tabla-pedidos-resumen');
+  const recientes = PEDIDOS.slice(0, 5);
+  if (recientes.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="color:var(--ivory-dim);text-align:center;padding:20px;">Sin pedidos aún</td></tr>';
+    return;
+  }
+  tbody.innerHTML = recientes.map(p => `<tr>
+    <td style="font-family:var(--font-display);">${p.codigo || '—'}</td>
+    <td>${p.cliente_nombre}</td>
+    <td>$${Number(p.total).toLocaleString('es-CL')}</td>
+    <td><span class="estado-badge estado-${p.estado}">${p.estado}</span></td>
+  </tr>`).join('');
+}
+
+/* ── ESTADÍSTICAS DE VENTAS ── */
+async function cargarEstadisticas() {
+  const contenido = document.getElementById('stats-contenido');
+  if (!contenido) return;
+
+  try {
+    const { data: pedidos, error } = await supabaseClient
+      .from('pedidos')
+      .select('items');
+
+    if (error) throw error;
+
+    if (!pedidos || pedidos.length === 0) {
+      contenido.innerHTML = '<p style="color:var(--ivory-dim);text-align:center;padding:30px;">Aún no hay pedidos registrados</p>';
+      return;
+    }
+
+    // Acumular unidades y total por producto_id
+    const mapa = {};
+    pedidos.forEach(pedido => {
+      const items = pedido.items;
+      if (!Array.isArray(items)) return;
+      items.forEach(item => {
+        const pid    = String(item.producto_id || item.id || '?');
+        const nombre = item.nombre_es || item.nombre || item.name || pid;
+        const qty    = Number(item.cantidad || item.qty || item.quantity || 1);
+        const precio = Number(item.precio_clp || item.precio || item.price || 0);
+        if (!mapa[pid]) mapa[pid] = { nombre, unidades: 0, total: 0 };
+        mapa[pid].unidades += qty;
+        mapa[pid].total    += qty * precio;
+      });
+    });
+
+    const ranking = Object.values(mapa)
+      .sort((a, b) => b.unidades - a.unidades)
+      .slice(0, 10);
+
+    if (ranking.length === 0) {
+      contenido.innerHTML = '<p style="color:var(--ivory-dim);text-align:center;padding:30px;">Aún no hay pedidos registrados</p>';
+      return;
+    }
+
+    contenido.innerHTML = `
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Pos.</th>
+              <th>Producto</th>
+              <th>Unidades vendidas</th>
+              <th>Total CLP generado</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${ranking.map((p, i) => `<tr>
+              <td style="font-family:var(--font-display);font-size:1.2rem;color:var(--copper-bright);text-align:center;">${i + 1}</td>
+              <td>${p.nombre}</td>
+              <td style="font-family:var(--font-display);font-size:1.1rem;color:var(--copper-bright);text-align:center;">${p.unidades}</td>
+              <td>$${Math.round(p.total).toLocaleString('es-CL')}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+
+  } catch (e) {
+    contenido.innerHTML = '<p style="color:#e74c3c;text-align:center;padding:30px;">Error al cargar estadísticas</p>';
+  }
+}
+
+/* ── CAMBIAR ESTADO PEDIDO ── */
+async function cambiarEstadoPedido(id, nuevoEstado) {
+  const { error } = await supabaseClient.from('pedidos').update({ estado: nuevoEstado }).eq('id', id);
+  if (error) { mostrarToast('Error al actualizar el pedido'); return; }
+  await cargarPedidos();
+  actualizarStats();
+  mostrarToast('Estado actualizado a "' + nuevoEstado + '"');
+}
+
+/* ── MODAL PRODUCTO ── */
+function abrirModalProducto() {
+  document.getElementById('prod-id').value = '';
+  document.getElementById('modal-prod-titulo').textContent = 'Nuevo producto';
+  document.getElementById('prod-nombre-es').value = '';
+  document.getElementById('prod-nombre-en').value = '';
+  document.getElementById('prod-desc-es').value = '';
+  document.getElementById('prod-desc-en').value = '';
+  document.getElementById('prod-precio-clp').value = '';
+  document.getElementById('prod-precio-usd').value = '';
+  document.getElementById('prod-stock').value = '1';
+  document.getElementById('prod-imagen-url').value = '';
+  document.getElementById('prod-destacado').value = 'false';
+  document.getElementById('prod-disponible').value = 'true';
+  document.getElementById('img-preview-el').style.display = 'none';
+  document.getElementById('modal-error').style.display = 'none';
+  document.getElementById('modal-producto').classList.add('open');
+}
+
+function editarProducto(id) {
+  const p = PRODUCTOS.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('prod-id').value = p.id;
+  document.getElementById('modal-prod-titulo').textContent = 'Editar producto';
+  document.getElementById('prod-nombre-es').value = p.nombre_es || '';
+  document.getElementById('prod-nombre-en').value = p.nombre_en || '';
+  document.getElementById('prod-desc-es').value = p.descripcion_es || '';
+  document.getElementById('prod-desc-en').value = p.descripcion_en || '';
+  document.getElementById('prod-precio-clp').value = p.precio_clp || '';
+  document.getElementById('prod-precio-usd').value = p.precio_usd || '';
+  document.getElementById('prod-stock').value = p.stock || 0;
+  document.getElementById('prod-categoria').value = p.categoria_id || '';
+  document.getElementById('prod-destacado').value = p.destacado ? 'true' : 'false';
+  document.getElementById('prod-disponible').value = p.disponible ? 'true' : 'false';
+  const url = p.imagenes && p.imagenes.length > 0 ? p.imagenes[0] : '';
+  document.getElementById('prod-imagen-url').value = url;
+  const prev = document.getElementById('img-preview-el');
+  if (url) { prev.src = url; prev.style.display = 'block'; } else { prev.style.display = 'none'; }
+  document.getElementById('modal-error').style.display = 'none';
+  document.getElementById('modal-producto').classList.add('open');
+}
+
+function cerrarModal() {
+  document.getElementById('modal-producto').classList.remove('open');
+}
+
+function previsualizarImagen() {}
+
+async function guardarProducto() {
+  const id       = document.getElementById('prod-id').value;
+  const nombreEs = document.getElementById('prod-nombre-es').value.trim();
+  const precioClp= document.getElementById('prod-precio-clp').value;
+  const catId    = document.getElementById('prod-categoria').value;
+  const errEl    = document.getElementById('modal-error');
+  const btn      = document.getElementById('btn-guardar');
+
+  if (!nombreEs || !precioClp || !catId) {
+    errEl.textContent = 'Nombre en español, precio CLP y categoría son obligatorios.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Guardando…';
+
+  const url = document.getElementById('prod-imagen-url').value.trim();
+  const datos = {
+    nombre_es:      nombreEs,
+    nombre_en:      document.getElementById('prod-nombre-en').value.trim() || nombreEs,
+    descripcion_es: document.getElementById('prod-desc-es').value.trim(),
+    descripcion_en: document.getElementById('prod-desc-en').value.trim(),
+    precio_clp:     Number(precioClp),
+    precio_usd:     Number(document.getElementById('prod-precio-usd').value) || 0,
+    categoria_id:   Number(catId),
+    stock:          Number(document.getElementById('prod-stock').value) || 0,
+    imagenes:       url ? [url] : [],
+    destacado:      document.getElementById('prod-destacado').value === 'true',
+    disponible:     document.getElementById('prod-disponible').value === 'true',
+  };
+
+  let error;
+  if (id) {
+    ({ error } = await supabaseClient.from('productos').update(datos).eq('id', id));
+  } else {
+    ({ error } = await supabaseClient.from('productos').insert(datos));
+  }
+
+  btn.disabled = false; btn.textContent = 'Guardar';
+
+  if (error) {
+    errEl.textContent = 'Error al guardar: ' + error.message;
+    errEl.style.display = 'block';
+    return;
+  }
+
+  cerrarModal();
+  await cargarProductos();
+  actualizarStats();
+  mostrarToast(id ? 'Producto actualizado ✓' : 'Producto agregado ✓');
+}
+
+async function eliminarProducto(id) {
+  const p = PRODUCTOS.find(x => x.id === id);
+  if (!confirm(`¿Eliminar "${p?.nombre_es}"? Esta acción no se puede deshacer.`)) return;
+  const { error } = await supabaseClient.from('productos').delete().eq('id', id);
+  if (error) { mostrarToast('Error al eliminar'); return; }
+  await cargarProductos();
+  actualizarStats();
+  mostrarToast('Producto eliminado');
+}
+
+async function toggleTendencia(id, nuevoEstado) {
+  const { error } = await supabaseClient
+    .from('productos').update({ tendencia: nuevoEstado }).eq('id', id);
+  if (error) { mostrarToast('Error al actualizar'); return; }
+  await cargarProductos();
+  mostrarToast(nuevoEstado ? 'Marcado como tendencia ✓' : 'Quitado de tendencias');
+}
+
+/* ── SUBIDA DE FOTO ── */
+
+async function subirFotoGeneric(file, ids) {
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { mostrarToast('La foto no puede superar 5MB'); return; }
+
+  const zone     = document.getElementById(ids.zone);
+  const estado   = document.getElementById(ids.estado);
+  const progreso = document.getElementById(ids.progreso);
+  const barra    = document.getElementById(ids.barra);
+  const texto    = document.getElementById(ids.texto);
+  const prev     = document.getElementById(ids.preview);
+
+  progreso.style.display   = 'block';
+  estado.style.opacity     = '0.4';
+  zone.style.pointerEvents = 'none';
+  barra.style.width        = '30%';
+  texto.textContent        = 'Subiendo imagen…';
+
+  const ext    = file.name.split('.').pop().toLowerCase();
+  const nombre = 'prod_' + Date.now() + '.' + ext;
+
+  try {
+    barra.style.width = '60%';
+    const fileBase64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload  = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+    const res = await fetch('/.netlify/functions/upload-foto', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileName: nombre, fileBase64, fileType: file.type }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Error al subir la foto');
+    barra.style.width = '100%';
+    texto.textContent = '✓ Foto subida correctamente';
+    document.getElementById(ids.urlInput).value = data.url;
+    if (prev) { prev.src = data.url; prev.style.display = 'block'; }
+    estado.innerHTML = `
+      <div style="font-size:1.5rem;margin-bottom:6px;">✅</div>
+      <div style="font-size:0.82rem;color:var(--copper-bright);">${file.name}</div>
+      <div style="font-size:0.7rem;color:var(--ivory-dim);margin-top:4px;">Haz clic para cambiar la foto</div>`;
+    estado.style.opacity = '1';
+    setTimeout(() => { progreso.style.display = 'none'; }, 1500);
+  } catch (err) {
+    console.error('Error subiendo foto:', err);
+    barra.style.width    = '0%';
+    texto.textContent    = 'Error al subir la foto. Intenta de nuevo.';
+    texto.style.color    = '#e74c3c';
+    estado.style.opacity = '1';
+    mostrarToast('Error al subir la foto');
+  } finally {
+    zone.style.pointerEvents = 'auto';
+  }
+}
+
+// ── Productos ──
+function dragOver(e) { e.preventDefault(); document.getElementById('upload-zone').style.borderColor = 'var(--copper)'; }
+function dragLeave(e) { document.getElementById('upload-zone').style.borderColor = 'var(--border)'; }
+function dropFile(e) {
+  e.preventDefault(); dragLeave(e);
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) subirFoto(file);
+}
+function subirFoto(file) {
+  return subirFotoGeneric(file, {
+    zone:     'upload-zone',
+    estado:   'upload-estado',
+    progreso: 'upload-progreso',
+    barra:    'barra-progreso-upload',
+    texto:    'upload-texto',
+    preview:  'img-preview-el',
+    urlInput: 'prod-imagen-url',
+  });
+}
+
+// ── Secciones Split ──
+function dragOverSplit(e) { e.preventDefault(); document.getElementById('split-upload-zone').style.borderColor = 'var(--copper)'; }
+function dragLeaveSplit(e) { document.getElementById('split-upload-zone').style.borderColor = 'var(--border)'; }
+function dropFileSplit(e) {
+  e.preventDefault(); dragLeaveSplit(e);
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) subirFotoSplit(file);
+}
+function subirFotoSplit(file) {
+  return subirFotoGeneric(file, {
+    zone:     'split-upload-zone',
+    estado:   'split-upload-estado',
+    progreso: 'split-upload-progreso',
+    barra:    'split-barra-progreso',
+    texto:    'split-upload-texto',
+    preview:  'split-img-preview',
+    urlInput: 'fi-foto-url',
+  });
+}
+
+/* ── CATEGORÍAS ── */
+function renderTablaCategorias() {
+  const tbody = document.getElementById('tabla-categorias');
+  if (!tbody) return;
+  if (CATEGORIAS.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="color:var(--ivory-dim);text-align:center;padding:20px;">Sin categorías aún</td></tr>';
+    return;
+  }
+  tbody.innerHTML = CATEGORIAS.map(c => `<tr>
+    <td>${c.nombre_es}</td>
+    <td style="color:var(--ivory-dim)">${c.nombre_en || '—'}</td>
+    <td>${c.orden}</td>
+    <td><span class="badge ${c.activa ? 'badge-on' : 'badge-off'}">${c.activa ? 'Activa' : 'Inactiva'}</span></td>
+    <td>
+      <button class="btn-edit" onclick="editarCategoria(${c.id})">Editar</button>
+      <button class="btn-delete" onclick="eliminarCategoria(${c.id})">Eliminar</button>
+    </td>
+  </tr>`).join('');
+}
+
+function generarSlug(texto) {
+  const slug = texto
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // quitar tildes
+    .replace(/[^a-z0-9\s-]/g, '')    // quitar caracteres especiales
+    .trim()
+    .replace(/\s+/g, '-');           // espacios → guión
+  document.getElementById('cat-slug').value = slug;
+}
+
+function abrirModalCategoria() {
+  document.getElementById('cat-id').value = '';
+  document.getElementById('modal-cat-titulo').textContent = 'Nueva categoría';
+  document.getElementById('cat-nombre-es').value = '';
+  document.getElementById('cat-nombre-en').value = '';
+  document.getElementById('cat-slug').value = '';
+  document.getElementById('cat-orden').value = CATEGORIAS.length + 1;
+  document.getElementById('cat-activa').value = 'true';
+  document.getElementById('modal-cat-error').style.display = 'none';
+  document.getElementById('modal-categoria').classList.add('open');
+}
+
+function editarCategoria(id) {
+  const c = CATEGORIAS.find(x => x.id === id);
+  if (!c) return;
+  document.getElementById('cat-id').value = c.id;
+  document.getElementById('modal-cat-titulo').textContent = 'Editar categoría';
+  document.getElementById('cat-nombre-es').value = c.nombre_es || '';
+  document.getElementById('cat-nombre-en').value = c.nombre_en || '';
+  document.getElementById('cat-slug').value = c.slug || '';
+  document.getElementById('cat-orden').value = c.orden || 1;
+  document.getElementById('cat-activa').value = c.activa ? 'true' : 'false';
+  document.getElementById('modal-cat-error').style.display = 'none';
+  document.getElementById('modal-categoria').classList.add('open');
+}
+
+function cerrarModalCategoria() {
+  document.getElementById('modal-categoria').classList.remove('open');
+}
+
+async function guardarCategoria() {
+  const id       = document.getElementById('cat-id').value;
+  const nombreEs = document.getElementById('cat-nombre-es').value.trim();
+  const slug     = document.getElementById('cat-slug').value.trim().toLowerCase().replace(/\s+/g, '-');
+  const errEl    = document.getElementById('modal-cat-error');
+  const btn      = document.getElementById('btn-guardar-cat');
+
+  if (!nombreEs || !slug) {
+    errEl.textContent = 'Nombre en español y slug son obligatorios.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Guardando…';
+
+  const datos = {
+    nombre_es: nombreEs,
+    nombre_en: document.getElementById('cat-nombre-en').value.trim() || nombreEs,
+    slug:      slug,
+    orden:     Number(document.getElementById('cat-orden').value) || 1,
+    activa:    document.getElementById('cat-activa').value === 'true',
+  };
+
+  let error;
+  if (id) {
+    ({ error } = await supabaseClient.from('categorias').update(datos).eq('id', id));
+  } else {
+    ({ error } = await supabaseClient.from('categorias').insert(datos));
+  }
+
+  btn.disabled = false; btn.textContent = 'Guardar';
+
+  if (error) {
+    errEl.textContent = 'Error al guardar: ' + error.message;
+    errEl.style.display = 'block';
+    return;
+  }
+
+  cerrarModalCategoria();
+  await cargarCategorias();
+  renderTablaCategorias();
+  // Actualizar el select de categorías en el modal de producto
+  const sel = document.getElementById('prod-categoria');
+  if (sel) sel.innerHTML = CATEGORIAS.map(c => `<option value="${c.id}">${c.nombre_es}</option>`).join('');
+  mostrarToast(id ? 'Categoría actualizada ✓' : 'Categoría agregada ✓');
+}
+
+async function eliminarCategoria(id) {
+  const c = CATEGORIAS.find(x => x.id === id);
+  if (!confirm(`¿Eliminar la categoría "${c?.nombre_es}"? Los productos quedarán sin categoría.`)) return;
+  const { error } = await supabaseClient.from('categorias').delete().eq('id', id);
+  if (error) { mostrarToast('Error al eliminar'); return; }
+  await cargarCategorias();
+  renderTablaCategorias();
+  mostrarToast('Categoría eliminada');
+}
+
+function calcularIPC() {
+  const costo    = Number(document.getElementById('ipc-costo').value) || 10000;
+  const anioBase = Number(document.getElementById('ipc-anio-base').value) || 2025;
+  const anios    = Number(document.getElementById('ipc-anios').value) || 4;
+  const ipcs     = {
+    2025: Number(document.getElementById('ipc-2025').value) / 100 || 0.045,
+    2026: Number(document.getElementById('ipc-2026').value) / 100 || 0.038,
+    2027: Number(document.getElementById('ipc-2027').value) / 100 || 0.035,
+  };
+
+  const tbody = document.getElementById('tabla-ipc');
+  let html = '';
+  let factorAcum = 1;
+
+  for (let i = 0; i < anios; i++) {
+    const anio = anioBase + i;
+    const ipc  = ipcs[anio] || 0.035;
+    if (i > 0) factorAcum *= (1 + ipc);
+    const costoNominal = costo;
+    const costoReal    = costo * factorAcum;
+    const variacion    = ((factorAcum - 1) * 100).toFixed(2);
+    const esBase       = i === 0;
+
+    html += `<tr>
+      <td>${anio}${esBase ? ' <span style="font-size:0.65rem;color:var(--copper)">(base)</span>' : ''}</td>
+      <td>${esBase ? '—' : (ipc * 100).toFixed(1) + '%'}</td>
+      <td>${esBase ? '1.0000' : factorAcum.toFixed(4)}</td>
+      <td>$${costoNominal.toLocaleString('es-CL')}</td>
+      <td class="${esBase ? '' : 'highlight'}">$${Math.round(costoReal).toLocaleString('es-CL')}</td>
+      <td>${esBase ? '—' : '+' + variacion + '%'}</td>
+    </tr>`;
+  }
+  tbody.innerHTML = html;
+}
+
+/* ── TOAST ── */
+function mostrarToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* ── Cerrar modales con Escape ── */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { cerrarModal(); cerrarModalInicio(); }
+});
+
+/* ══════════════════════════════════════════════════════════════
+   INICIO — Gestión de contenido_inicio
+══════════════════════════════════════════════════════════════ */
+
+var CONTENIDO_INICIO = [];
+var _inicioEditId    = null;
+
+/* ── Cargar (autenticado ve todas las filas, incluso inactivas) ── */
+async function cargarInicio() {
+  const { data } = await supabaseClient
+    .from('contenido_inicio').select('*').order('orden');
+  CONTENIDO_INICIO = data || [];
+  renderListaInicio();
+}
+
+/* ── Render lista de secciones ── */
+function renderListaInicio() {
+  const lista = document.getElementById('lista-inicio');
+  if (!lista) return;
+  if (CONTENIDO_INICIO.length === 0) {
+    lista.innerHTML = '<p style="color:var(--ivory-dim);text-align:center;padding:30px;">Sin secciones. Usa "Agregar sección".</p>';
+    return;
+  }
+  const NOMBRES = {
+    hero:'🏠 Hero', productos:'🪙 Productos',
+    split1:'📸 Sección 1 (texto izq, foto der)', split2:'📸 Sección 2 (foto izq, texto der)',
+    contacto:'✉ Contacto', footer:'⬛ Footer'
+  };
+  const n = CONTENIDO_INICIO.length;
+  lista.innerHTML = CONTENIDO_INICIO.map((row, idx) => `
+    <div class="inicio-row">
+      <div class="inicio-row-info">
+        <span class="inicio-row-name">${NOMBRES[row.seccion] || row.seccion}</span>
+        <span class="badge ${row.activa ? 'badge-on' : 'badge-off'}">${row.activa ? 'Activa' : 'Inactiva'}</span>
+      </div>
+      <div class="inicio-row-acciones">
+        <button class="btn-orden" title="Subir"  onclick="moverInicio(${row.id},'up')"   ${idx === 0     ? 'disabled' : ''}>↑</button>
+        <button class="btn-orden" title="Bajar"  onclick="moverInicio(${row.id},'down')" ${idx === n - 1 ? 'disabled' : ''}>↓</button>
+        <button class="btn-toggle ${row.activa ? 'btn-toggle-on' : 'btn-toggle-off'}"
+                onclick="toggleInicio(${row.id},${!row.activa})">
+          ${row.activa ? 'Desactivar' : 'Activar'}
+        </button>
+        <button class="btn-edit"   onclick="editarInicio(${row.id})">Editar</button>
+        <button class="btn-delete" onclick="eliminarInicio(${row.id})">Eliminar</button>
+      </div>
+    </div>`).join('');
+}
+
+/* ── Toggle activa/inactiva ── */
+async function toggleInicio(id, nuevoEstado) {
+  const { error } = await supabaseClient
+    .from('contenido_inicio').update({ activa: nuevoEstado }).eq('id', id);
+  if (error) { mostrarToast('Error al actualizar'); return; }
+  await cargarInicio();
+  mostrarToast(nuevoEstado ? 'Sección activada' : 'Sección desactivada');
+}
+
+/* ── Subir / bajar (swap de orden) ── */
+async function moverInicio(id, dir) {
+  const idx = CONTENIDO_INICIO.findIndex(r => r.id === id);
+  if (idx < 0) return;
+  const oIdx = dir === 'up' ? idx - 1 : idx + 1;
+  if (oIdx < 0 || oIdx >= CONTENIDO_INICIO.length) return;
+  const a = CONTENIDO_INICIO[idx];
+  const b = CONTENIDO_INICIO[oIdx];
+  await Promise.all([
+    supabaseClient.from('contenido_inicio').update({ orden: b.orden }).eq('id', a.id),
+    supabaseClient.from('contenido_inicio').update({ orden: a.orden }).eq('id', b.id),
+  ]);
+  await cargarInicio();
+}
+
+/* ── Abrir modal editar ── */
+function editarInicio(id) {
+  const row = CONTENIDO_INICIO.find(r => r.id === id);
+  if (!row) return;
+  _inicioEditId = id;
+  const tipo = (row.datos && row.datos._tipo) || row.seccion;
+  document.getElementById('modal-inicio-titulo').textContent = 'Editar — ' + row.seccion;
+  document.getElementById('modal-inicio-error').style.display = 'none';
+  document.getElementById('modal-inicio-form').innerHTML = buildFormInicio(tipo, row.datos || {});
+  document.getElementById('modal-inicio').classList.add('open');
+}
+
+/* ── Abrir modal agregar ── */
+function abrirAgregarInicio() {
+  _inicioEditId = null;
+  document.getElementById('modal-inicio-titulo').textContent = 'Nueva sección';
+  document.getElementById('modal-inicio-error').style.display = 'none';
+  const tipos = ['hero','philosophy','productos','legado','sustenta','contacto','footer'];
+  document.getElementById('modal-inicio-form').innerHTML = `
+    <div class="form-grid">
+      <div class="form-field full">
+        <label>Tipo de sección *</label>
+        <select id="fi-tipo-nuevo" onchange="cambiarTipoNuevo(this.value)">
+          <option value="">— seleccionar —</option>
+          ${tipos.map(t => `<option value="${t}">${t}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-field full">
+        <label>Nombre interno (identificador en BD)</label>
+        <input type="text" id="fi-seccion-nombre" placeholder="Se rellena automáticamente">
+      </div>
+    </div>
+    <div id="fi-nueva-campos"></div>`;
+  document.getElementById('modal-inicio').classList.add('open');
+}
+
+function cambiarTipoNuevo(tipo) {
+  const el = document.getElementById('fi-nueva-campos');
+  if (!el) return;
+  if (!tipo) { el.innerHTML = ''; return; }
+  const nombreEl = document.getElementById('fi-seccion-nombre');
+  if (nombreEl && !nombreEl.value) nombreEl.value = tipo;
+  el.innerHTML = buildFormInicio(tipo, {});
+}
+
+/* ── Cerrar modal ── */
+function cerrarModalInicio() {
+  document.getElementById('modal-inicio').classList.remove('open');
+}
+
+/* ══ BUILDERS DE FORMULARIO ══ */
+
+function buildFormInicio(seccion, d) {
+  switch (seccion) {
+    case 'hero':       return buildFormHero(d);
+    case 'philosophy': return buildFormPhilosophy(d);
+    case 'productos':  return buildFormProductos(d);
+    case 'legado':     return buildFormLegado(d);
+    case 'sustenta':   return buildFormSustenta(d);
+    case 'split1':
+    case 'split2':     return buildFormSplit(d);
+    case 'contacto':   return buildFormContacto(d);
+    case 'footer':     return buildFormFooter(d);
+    default:
+      return `<div class="form-field full" style="margin-top:12px;">
+        <label>Datos JSON (edición avanzada)</label>
+        <textarea id="fi-raw-json" style="min-height:180px;font-family:monospace;font-size:0.8rem;">${escForm(JSON.stringify(d, null, 2))}</textarea>
+      </div>`;
+  }
+}
+
+// Helpers
+function fi(id, label, val, full, textarea) {
+  const cls = full ? ' full' : '';
+  if (textarea) return `<div class="form-field${cls}"><label>${label}</label><textarea id="${id}" style="min-height:72px;">${escForm(val)}</textarea></div>`;
+  return `<div class="form-field${cls}"><label>${label}</label><input type="text" id="${id}" value="${escForm(val)}"></div>`;
+}
+function secT(t) { return `<div class="form-section-title">${t}</div>`; }
+function escForm(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function fiRow(fields) {
+  const cols = fields.length === 3 ? 'fi-row-3' : 'fi-row-2';
+  return `<div class="${cols}">${fields.map(([id, lbl, val]) =>
+    `<div class="fi-group"><span class="fi-label">${lbl}</span><input class="fi-input" id="${id}" type="text" value="${escForm(val)}"></div>`
+  ).join('')}</div>`;
+}
+function fiRowTa(fields) {
+  return `<div class="fi-row-2">${fields.map(([id, lbl, val]) =>
+    `<div class="fi-group"><span class="fi-label">${lbl}</span><textarea class="fi-input" id="${id}" style="min-height:68px;">${escForm(val)}</textarea></div>`
+  ).join('')}</div>`;
+}
+
+/* HERO */
+function buildFormHero(d) {
+  return `<div class="form-grid">
+    ${secT('Tagline')}
+    ${fi('fi-tagline-es','Tagline ES',d.tagline_es)}
+    ${fi('fi-tagline-en','Tagline EN',d.tagline_en)}
+    ${secT('Botón CTA')}
+    ${fi('fi-cta-texto-es','Texto botón ES',d.cta_texto_es)}
+    ${fi('fi-cta-texto-en','Texto botón EN',d.cta_texto_en)}
+    ${fi('fi-cta-url','URL del botón',d.cta_url,true)}
+  </div>`;
+}
+
+/* PHILOSOPHY */
+function buildFormPhilosophy(d) {
+  const pilares = d.pilares || [{},{},{}];
+  const nomPilar = ['Pilar 1 — Patrimonio','Pilar 2 — Fuerza','Pilar 3 — Sustentabilidad'];
+  let html = `<div class="form-grid">
+    ${secT('Encabezado')}
+    ${fi('fi-eyebrow-es','Eyebrow ES',d.eyebrow_es)}
+    ${fi('fi-eyebrow-en','Eyebrow EN',d.eyebrow_en)}
+    ${fi('fi-titulo-es','Título ES (acepta &lt;em&gt;)',d.titulo_es,true)}
+    ${fi('fi-titulo-en','Título EN (acepta &lt;em&gt;)',d.titulo_en,true)}
+  </div>`;
+  [0,1,2].forEach(i => {
+    const p = pilares[i] || {};
+    html += `<div class="form-pillar">
+      <span class="form-pillar-label">${nomPilar[i]}</span>
+      ${fiRow([[`fi-pilar${i}-titulo-es`,'Título ES',p.titulo_es],[`fi-pilar${i}-titulo-en`,'Título EN',p.titulo_en]])}
+      ${fiRowTa([[`fi-pilar${i}-texto-es`,'Texto ES',p.texto_es],[`fi-pilar${i}-texto-en`,'Texto EN',p.texto_en]])}
+    </div>`;
+  });
+  return html;
+}
+
+/* PRODUCTOS */
+function buildFormProductos(d) {
+  return `<div class="form-grid">
+    ${fi('fi-eyebrow-es','Eyebrow ES',d.eyebrow_es)}
+    ${fi('fi-eyebrow-en','Eyebrow EN',d.eyebrow_en)}
+    ${fi('fi-titulo-es','Título ES (acepta &lt;em&gt;)',d.titulo_es,true)}
+    ${fi('fi-titulo-en','Título EN (acepta &lt;em&gt;)',d.titulo_en,true)}
+  </div>`;
+}
+
+/* LEGADO */
+function buildFormLegado(d) {
+  return `<div class="form-grid">
+    ${secT('Encabezado')}
+    ${fi('fi-eyebrow-es','Eyebrow ES',d.eyebrow_es)}
+    ${fi('fi-eyebrow-en','Eyebrow EN',d.eyebrow_en)}
+    ${fi('fi-titulo-es','Título ES (acepta &lt;em&gt;)',d.titulo_es,true)}
+    ${fi('fi-titulo-en','Título EN (acepta &lt;em&gt;)',d.titulo_en,true)}
+    ${secT('Párrafos')}
+    ${fi('fi-p1-es','Párrafo 1 ES',d.p1_es,true,true)}
+    ${fi('fi-p1-en','Párrafo 1 EN',d.p1_en,true,true)}
+    ${fi('fi-p2-es','Párrafo 2 ES',d.p2_es,true,true)}
+    ${fi('fi-p2-en','Párrafo 2 EN',d.p2_en,true,true)}
+    ${secT('Cita')}
+    ${fi('fi-cita-es','Cita ES',d.cita_es,true,true)}
+    ${fi('fi-cita-en','Cita EN',d.cita_en,true,true)}
+    ${secT('Fundadora')}
+    ${fi('fi-fundadora','Nombre (aparece en visual)',d.fundadora,true)}
+  </div>`;
+}
+
+/* SUSTENTA */
+function buildFormSustenta(d) {
+  const stats = d.stats || [{},{},{}];
+  let html = `<div class="form-grid">
+    ${secT('Encabezado')}
+    ${fi('fi-eyebrow-es','Eyebrow ES',d.eyebrow_es)}
+    ${fi('fi-eyebrow-en','Eyebrow EN',d.eyebrow_en)}
+    ${fi('fi-titulo-es','Título ES (acepta &lt;em&gt;)',d.titulo_es,true)}
+    ${fi('fi-titulo-en','Título EN (acepta &lt;em&gt;)',d.titulo_en,true)}
+    ${fi('fi-texto-es','Descripción ES',d.texto_es,true,true)}
+    ${fi('fi-texto-en','Descripción EN',d.texto_en,true,true)}
+    ${secT('Estadísticas')}
+  </div>`;
+  [0,1,2].forEach(i => {
+    const s = stats[i] || {};
+    html += `<div class="form-pillar">
+      <span class="form-pillar-label">Stat ${i+1}</span>
+      ${fiRow([[`fi-stat${i}-numero`,'Número',s.numero],[`fi-stat${i}-label-es`,'Etiqueta ES',s.label_es],[`fi-stat${i}-label-en`,'Etiqueta EN',s.label_en]])}
+    </div>`;
+  });
+  return html;
+}
+
+/* SPLIT1 / SPLIT2 */
+function buildFormSplit(d) {
+  const fotoUrl = d.foto_url || '';
+  const estadoHtml = fotoUrl
+    ? `<div style="font-size:1.5rem;margin-bottom:6px;">✅</div>
+       <div style="font-size:0.82rem;color:var(--copper-bright);">Foto actual</div>
+       <div style="font-size:0.7rem;color:var(--ivory-dim);margin-top:4px;">Haz clic para cambiar la foto</div>`
+    : `<div style="font-size:2rem;margin-bottom:8px;">📸</div>
+       <div style="font-size:0.85rem;color:var(--copper-bright);">Arrastra una foto aquí o haz clic para seleccionar</div>
+       <div style="font-size:0.72rem;color:var(--ivory-dim);margin-top:4px;">JPG, PNG, WEBP · máx 5MB</div>`;
+  return `<div class="form-grid">
+    ${secT('Eyebrow')}
+    ${fiRow([['fi-eyebrow-es','Eyebrow ES',d.eyebrow_es||''],['fi-eyebrow-en','Eyebrow EN',d.eyebrow_en||'']])}
+    ${secT('Título')}
+    ${fiRow([['fi-titulo-es','Título ES',d.titulo_es||''],['fi-titulo-en','Título EN',d.titulo_en||'']])}
+    ${secT('Texto')}
+    ${fiRowTa([['fi-texto-es','Texto ES',d.texto_es||''],['fi-texto-en','Texto EN',d.texto_en||'']])}
+    ${secT('Foto')}
+    <div class="form-field full">
+      <label>Foto de sección</label>
+      <div id="split-upload-zone" style="border:2px dashed var(--border);padding:24px;text-align:center;cursor:pointer;transition:border-color 0.3s;position:relative;"
+           onclick="document.getElementById('split-file-input').click()"
+           ondragover="dragOverSplit(event)" ondragleave="dragLeaveSplit(event)" ondrop="dropFileSplit(event)">
+        <input type="file" id="split-file-input" accept="image/*" style="display:none" onchange="subirFotoSplit(this.files[0])">
+        <div id="split-upload-estado">${estadoHtml}</div>
+      </div>
+      <div id="split-upload-progreso" style="display:none;margin-top:10px;">
+        <div style="height:3px;background:var(--petrol-light);position:relative;overflow:hidden;">
+          <div id="split-barra-progreso" style="height:100%;background:var(--copper);width:0%;transition:width 0.4s;"></div>
+        </div>
+        <div id="split-upload-texto" style="font-size:0.72rem;color:var(--ivory-dim);margin-top:6px;text-align:center;"></div>
+      </div>
+      <img id="split-img-preview" src="${escForm(fotoUrl)}" style="${fotoUrl ? '' : 'display:none;'}width:100%;margin-top:10px;max-height:200px;object-fit:cover;">
+      <input type="hidden" id="fi-foto-url" value="${escForm(fotoUrl)}">
+    </div>
+  </div>`;
+}
+
+/* CONTACTO */
+function buildFormContacto(d) {
+  return `<div class="form-grid">
+    ${secT('Encabezado')}
+    ${fi('fi-eyebrow-es','Eyebrow ES',d.eyebrow_es)}
+    ${fi('fi-eyebrow-en','Eyebrow EN',d.eyebrow_en)}
+    ${fi('fi-titulo-es','Título ES (acepta &lt;em&gt;)',d.titulo_es,true)}
+    ${fi('fi-titulo-en','Título EN (acepta &lt;em&gt;)',d.titulo_en,true)}
+    ${fi('fi-texto-es','Párrafo ES',d.texto_es,true,true)}
+    ${fi('fi-texto-en','Párrafo EN',d.texto_en,true,true)}
+    ${fi('fi-cta-es','Texto botón ES',d.cta_es)}
+    ${fi('fi-cta-en','Texto botón EN',d.cta_en)}
+    ${secT('Canales de contacto')}
+    ${fi('fi-correo','Correo electrónico',d.correo,true)}
+    ${fi('fi-instagram-handle','Instagram @handle',d.instagram_handle)}
+    ${fi('fi-instagram-url','Instagram URL',d.instagram_url)}
+    ${fi('fi-whatsapp-numero','WhatsApp número',d.whatsapp_numero)}
+    ${fi('fi-whatsapp-url','WhatsApp URL (wa.me/…)',d.whatsapp_url)}
+    ${fi('fi-atelier','Atelier / Dirección',d.atelier,true)}
+  </div>`;
+}
+
+/* FOOTER */
+function buildFormFooter(d) {
+  const social = d.social      || [{label:'IG',url:''},{label:'WA',url:''},{label:'✉',url:''}];
+  const cols   = d.colecciones || [{},{},{}];
+  const info   = d.informacion || [{},{},{},{}];
+  const legal  = d.legal       || [{},{},{}];
+
+  let html = `<div class="form-grid">
+    ${secT('Tagline & Copyright')}
+    ${fi('fi-tagline-es','Tagline ES',d.tagline_es)}
+    ${fi('fi-tagline-en','Tagline EN',d.tagline_en)}
+    ${fi('fi-copyright-es','Copyright ES',d.copyright_es)}
+    ${fi('fi-copyright-en','Copyright EN',d.copyright_en)}
+    ${secT('Redes sociales')}
+  </div>`;
+  social.forEach((s, i) => {
+    html += `<div class="form-pillar" style="margin-bottom:4px;">
+      <span class="form-pillar-label">Red ${i+1}</span>
+      ${fiRow([[`fi-soc${i}-label`,'Etiqueta',s.label],[`fi-soc${i}-url`,'URL',s.url]])}
+    </div>`;
+  });
+
+  html += `<div class="form-grid">${secT('Colecciones')}</div>`;
+  cols.forEach((c, i) => {
+    html += `<div class="form-pillar" style="margin-bottom:4px;">
+      <span class="form-pillar-label">Colección ${i+1}</span>
+      ${fiRow([[`fi-col${i}-es`,'Texto ES',c.texto_es],[`fi-col${i}-en`,'Texto EN',c.texto_en],[`fi-col${i}-url`,'URL',c.url]])}
+    </div>`;
+  });
+
+  html += `<div class="form-grid">${secT('Información')}</div>`;
+  info.forEach((c, i) => {
+    html += `<div class="form-pillar" style="margin-bottom:4px;">
+      <span class="form-pillar-label">Enlace ${i+1}</span>
+      ${fiRow([[`fi-inf${i}-es`,'Texto ES',c.texto_es],[`fi-inf${i}-en`,'Texto EN',c.texto_en],[`fi-inf${i}-url`,'URL',c.url]])}
+    </div>`;
+  });
+
+  html += `<div class="form-grid">${secT('Legal')}</div>`;
+  legal.forEach((c, i) => {
+    html += `<div class="form-pillar" style="margin-bottom:4px;">
+      <span class="form-pillar-label">Enlace ${i+1}</span>
+      ${fiRow([[`fi-leg${i}-es`,'Texto ES',c.texto_es],[`fi-leg${i}-en`,'Texto EN',c.texto_en],[`fi-leg${i}-url`,'URL',c.url]])}
+    </div>`;
+  });
+  return html;
+}
+
+/* ══ READERS DE FORMULARIO ══ */
+
+function leerFormInicio(tipo) {
+  function val(id) { const el = document.getElementById(id); return el ? el.value.trim() : ''; }
+  switch (tipo) {
+    case 'hero':
+      return {
+        tagline_es: val('fi-tagline-es'), tagline_en: val('fi-tagline-en'),
+        cta_texto_es: val('fi-cta-texto-es'), cta_texto_en: val('fi-cta-texto-en'),
+        cta_url: val('fi-cta-url'), scroll_es: 'Scroll', scroll_en: 'Scroll',
+      };
+    case 'philosophy':
+      return {
+        eyebrow_es: val('fi-eyebrow-es'), eyebrow_en: val('fi-eyebrow-en'),
+        titulo_es: val('fi-titulo-es'), titulo_en: val('fi-titulo-en'),
+        pilares: [0,1,2].map(i => ({
+          titulo_es: val(`fi-pilar${i}-titulo-es`), titulo_en: val(`fi-pilar${i}-titulo-en`),
+          texto_es:  val(`fi-pilar${i}-texto-es`),  texto_en:  val(`fi-pilar${i}-texto-en`),
+        })),
+      };
+    case 'productos':
+      return {
+        eyebrow_es: val('fi-eyebrow-es'), eyebrow_en: val('fi-eyebrow-en'),
+        titulo_es:  val('fi-titulo-es'),  titulo_en:  val('fi-titulo-en'),
+      };
+    case 'legado':
+      return {
+        eyebrow_es: val('fi-eyebrow-es'), eyebrow_en: val('fi-eyebrow-en'),
+        titulo_es:  val('fi-titulo-es'),  titulo_en:  val('fi-titulo-en'),
+        p1_es: val('fi-p1-es'), p1_en: val('fi-p1-en'),
+        p2_es: val('fi-p2-es'), p2_en: val('fi-p2-en'),
+        cita_es: val('fi-cita-es'), cita_en: val('fi-cita-en'),
+        fundadora: val('fi-fundadora'),
+      };
+    case 'sustenta':
+      return {
+        eyebrow_es: val('fi-eyebrow-es'), eyebrow_en: val('fi-eyebrow-en'),
+        titulo_es:  val('fi-titulo-es'),  titulo_en:  val('fi-titulo-en'),
+        texto_es:   val('fi-texto-es'),   texto_en:   val('fi-texto-en'),
+        stats: [0,1,2].map(i => ({
+          numero:   val(`fi-stat${i}-numero`),
+          label_es: val(`fi-stat${i}-label-es`),
+          label_en: val(`fi-stat${i}-label-en`),
+        })),
+      };
+    case 'split1':
+    case 'split2':
+      return {
+        eyebrow_es: val('fi-eyebrow-es'), eyebrow_en: val('fi-eyebrow-en'),
+        titulo_es:  val('fi-titulo-es'),  titulo_en:  val('fi-titulo-en'),
+        texto_es:   val('fi-texto-es'),   texto_en:   val('fi-texto-en'),
+        foto_url:   val('fi-foto-url'),
+      };
+    case 'contacto':
+      return {
+        eyebrow_es: val('fi-eyebrow-es'), eyebrow_en: val('fi-eyebrow-en'),
+        titulo_es:  val('fi-titulo-es'),  titulo_en:  val('fi-titulo-en'),
+        texto_es:   val('fi-texto-es'),   texto_en:   val('fi-texto-en'),
+        cta_es: val('fi-cta-es'), cta_en: val('fi-cta-en'),
+        correo: val('fi-correo'),
+        instagram_handle: val('fi-instagram-handle'),
+        instagram_url:    val('fi-instagram-url'),
+        whatsapp_numero:  val('fi-whatsapp-numero'),
+        whatsapp_url:     val('fi-whatsapp-url'),
+        atelier: val('fi-atelier'),
+      };
+    case 'footer':
+      return {
+        tagline_es:   val('fi-tagline-es'),   tagline_en:   val('fi-tagline-en'),
+        copyright_es: val('fi-copyright-es'), copyright_en: val('fi-copyright-en'),
+        social:      [0,1,2].map(i   => ({ label: val(`fi-soc${i}-label`), url: val(`fi-soc${i}-url`) })),
+        colecciones: [0,1,2].map(i   => ({ texto_es: val(`fi-col${i}-es`), texto_en: val(`fi-col${i}-en`), url: val(`fi-col${i}-url`) })),
+        informacion: [0,1,2,3].map(i => ({ texto_es: val(`fi-inf${i}-es`), texto_en: val(`fi-inf${i}-en`), url: val(`fi-inf${i}-url`) })),
+        legal:       [0,1,2].map(i   => ({ texto_es: val(`fi-leg${i}-es`), texto_en: val(`fi-leg${i}-en`), url: val(`fi-leg${i}-url`) })),
+      };
+    default: {
+      try { return JSON.parse(document.getElementById('fi-raw-json')?.value || '{}'); }
+      catch(e) { return {}; }
+    }
+  }
+}
+
+/* ── Guardar (crear o actualizar) ── */
+async function guardarInicio() {
+  const btn   = document.getElementById('btn-guardar-inicio');
+  const errEl = document.getElementById('modal-inicio-error');
+  errEl.style.display = 'none';
+  btn.disabled = true; btn.textContent = 'Guardando…';
+
+  let error;
+  if (_inicioEditId) {
+    const row  = CONTENIDO_INICIO.find(r => r.id === _inicioEditId);
+    if (!row) { btn.disabled = false; btn.textContent = 'Guardar cambios'; return; }
+    const tipo = (row.datos && row.datos._tipo) || row.seccion;
+    const datos = leerFormInicio(tipo);
+    if (row.datos && row.datos._tipo) datos._tipo = row.datos._tipo;
+    ({ error } = await supabaseClient.from('contenido_inicio').update({ datos }).eq('id', _inicioEditId));
+  } else {
+    const tipo    = document.getElementById('fi-tipo-nuevo')?.value;
+    const nombre  = document.getElementById('fi-seccion-nombre')?.value.trim() || tipo;
+    if (!tipo) {
+      errEl.textContent = 'Selecciona un tipo de sección.';
+      errEl.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'Guardar cambios';
+      return;
+    }
+    const datos = leerFormInicio(tipo);
+    datos._tipo = tipo;
+    const maxOrden = CONTENIDO_INICIO.reduce((m, r) => Math.max(m, r.orden), 0);
+    ({ error } = await supabaseClient.from('contenido_inicio')
+      .insert({ seccion: nombre, orden: maxOrden + 1, activa: true, datos }));
+  }
+
+  btn.disabled = false; btn.textContent = 'Guardar cambios';
+
+  if (error) {
+    errEl.textContent = 'Error al guardar: ' + error.message;
+    errEl.style.display = 'block';
+    return;
+  }
+  cerrarModalInicio();
+  await cargarInicio();
+  mostrarToast(_inicioEditId ? 'Sección actualizada ✓' : 'Sección creada ✓');
+}
+
+/* ── Eliminar con confirmación ── */
+async function eliminarInicio(id) {
+  const row = CONTENIDO_INICIO.find(r => r.id === id);
+  if (!confirm(`¿Eliminar la sección "${row?.seccion}"?\nEsta acción no se puede deshacer.`)) return;
+  const { error } = await supabaseClient.from('contenido_inicio').delete().eq('id', id);
+  if (error) { mostrarToast('Error al eliminar'); return; }
+  await cargarInicio();
+  mostrarToast('Sección eliminada');
+}
+</script>
+</body>
+</html>

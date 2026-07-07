@@ -1,0 +1,59 @@
+# =============================================================================
+#  KEEP-ALIVE — Mujer Cobra
+#  .github/workflows/keep-alive.yml
+# -----------------------------------------------------------------------------
+#  Supabase pausa los proyectos gratuitos si no reciben actividad por 7 días.
+#  Este workflow hace un ping cada 3 días para mantener el proyecto activo.
+#
+#  CÓMO ACTIVARLO:
+#  1. Copia este archivo a tu repo en: .github/workflows/keep-alive.yml
+#  2. En GitHub → Settings → Secrets and variables → Actions → New secret
+#     Agrega los 2 secretos:
+#       SUPABASE_URL       → la URL de tu proyecto (ej: https://mvtdzqjtbmgvhdoouhjw.supabase.co)
+#       SUPABASE_ANON_KEY  → la clave anon de tu proyecto
+#  3. Haz push del archivo. GitHub Actions lo activará automáticamente.
+#  4. Para comprobar que funciona: Actions → "Supabase Keep-Alive" → Run workflow
+# =============================================================================
+
+name: Supabase Keep-Alive
+
+on:
+  schedule:
+    # Cada 3 días a las 6:00 AM UTC (3:00 AM Chile)
+    # Formato cron: minuto hora día-del-mes mes día-de-la-semana
+    - cron: '0 6 */3 * *'
+
+  # Permite ejecutarlo manualmente desde la pestaña Actions de GitHub
+  workflow_dispatch:
+
+jobs:
+  ping:
+    name: Ping Supabase
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Ping al catálogo de productos
+        # Hacemos una consulta liviana: pedir solo 1 categoría
+        # Esto es suficiente para que Supabase registre actividad y no pause el proyecto
+        run: |
+          echo "⏰ Enviando ping a Supabase..."
+          
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/categorias?select=id&limit=1" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
+          
+          echo "📡 Respuesta HTTP: $RESPONSE"
+          
+          if [ "$RESPONSE" = "200" ]; then
+            echo "✅ Supabase responde correctamente. Proyecto activo."
+          else
+            echo "⚠️  Respuesta inesperada: $RESPONSE"
+            echo "   Revisa que los secretos SUPABASE_URL y SUPABASE_ANON_KEY estén bien configurados."
+            exit 1
+          fi
+
+      - name: Registrar fecha del ping
+        run: |
+          echo "📅 Ping ejecutado el: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "🌐 Proyecto: ${{ secrets.SUPABASE_URL }}"

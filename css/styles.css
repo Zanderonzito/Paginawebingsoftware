@@ -180,6 +180,16 @@ body::before {
   background:var(--ivory); transition:all 0.3s;
 }
 
+/* Botón X dentro del menú móvil — oculto en escritorio */
+.nav-close-li { display:none; }
+
+/* Bloqueo de scroll en body cuando menú está abierto (compatible iOS) */
+body.menu-open {
+  overflow:hidden;
+  position:fixed;
+  width:100%;
+}
+
 /* ── Buttons ───────────────────────────────────────────────── */
 .btn-primary {
   display:inline-flex; align-items:center; gap:10px;
@@ -344,20 +354,74 @@ footer {
 
 /* ── Responsive ────────────────────────────────────────────── */
 @media (max-width: 900px) {
-  .nav { padding:20px 28px; }
-  .nav.scrolled { padding:14px 28px; }
-  .nav-links { display:none; flex-direction:column; position:fixed;
-    inset:0; background:rgba(6,26,27,0.98); justify-content:center;
-    align-items:center; gap:28px; z-index:490;
+  /* La nav siempre por encima de todo en móvil */
+  .nav {
+    padding:18px 24px;
+    z-index:600; /* sube la nav entera */
+  }
+  .nav.scrolled { padding:14px 24px; }
+
+  /* Menú móvil: overlay a nivel del body (movido por JS), cubre pantalla completa */
+  .nav-links {
+    display:none; flex-direction:column;
+    position:fixed;
+    top:0; left:0; right:0; bottom:0;
+    background:var(--petrol); /* #0f3839, petróleo plano del sitio */
+    backdrop-filter:none;
+    -webkit-backdrop-filter:none;
+    justify-content:center; align-items:center;
+    gap:28px;
+    z-index:9999;
+    padding:80px 40px 60px;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    /*estas dos lineas que siguen son para que en un iOS, el menu no se mimetice con el fondo y se vea el overlay (fondo color verde petroleo del menu)*/
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
   }
   .nav-links.open { display:flex; }
-  .nav-links a { font-size:1rem; }
-  .nav-hamburger { display:flex; z-index:600; }
+  .nav-links a { font-size:1.1rem; letter-spacing:0.18em; }
+
+  /* Botón X: esquina superior derecha del overlay */
+  .nav-close-li {
+    display:block;
+    position:absolute;
+    top:20px; right:20px;
+  }
+  .nav-close-btn {
+    background:none; border:none;
+    color:var(--ivory);
+    font-size:2rem; line-height:1;
+    cursor:pointer; padding:6px 10px;
+    opacity:0.75; transition:opacity 0.2s;
+  }
+  .nav-close-btn:hover, .nav-close-btn:focus { opacity:1; outline:none; }
+
+  /* Hamburger visible */
+  .nav-hamburger {
+    display:flex;
+    position:relative;
+  }
+
+  /* Animación hamburger → X */
+  .nav-hamburger span { transition:all 0.3s ease; }
+  .nav-hamburger.open span:nth-child(1) { transform:translateY(6px) rotate(45deg); }
+  .nav-hamburger.open span:nth-child(2) { opacity:0; transform:scaleX(0); }
+  .nav-hamburger.open span:nth-child(3) { transform:translateY(-6px) rotate(-45deg); }
+
   .page-header { padding:130px 28px 60px; }
   .footer-inner { grid-template-columns:1fr 1fr; gap:32px; }
+
+  /* Lang toggle y carrito dentro del menú móvil */
+  .nav-links .lang-toggle { margin-top:4px; }
+  .nav-links .nav-cart { padding:10px 20px; }
 }
+
 @media (max-width: 600px) {
   .footer-inner { grid-template-columns:1fr; }
   .footer-bottom { flex-direction:column; gap:8px; text-align:center; }
   .nav-cart .cart-label { display:none; }
+
+  /* Toast más pequeño en móvil */
+  .toast { bottom:16px; right:16px; left:16px; max-width:none; }
 }
