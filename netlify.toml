@@ -15,3 +15,8 @@
   from = "/api/crear-preferencia"
   to = "/.netlify/functions/crear-preferencia"
   status = 200
+
+[[redirects]]
+  from = "/api/mp-webhook"
+  to = "/.netlify/functions/mp-webhook"
+  status = 200

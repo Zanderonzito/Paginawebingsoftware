@@ -200,10 +200,12 @@ async function renderCart() {
           <span>${isEn ? 'Subtotal' : 'Subtotal'}</span>
           <span>${fmtCLP(subtotal)}</span>
         </div>
-        <div class="summary-row">
+        <div class="summary-row" style="align-items:flex-start;">
           <span>${isEn ? 'Shipping' : 'Envío'}</span>
-          <span style="font-size:0.78rem;color:rgba(245,237,224,0.5);font-style:italic;">
-            ${isEn ? 'To coordinate with seller' : 'A coordinar con la vendedora'}
+          <span style="font-size:0.78rem;color:rgba(245,237,224,0.5);font-style:italic;text-align:right;line-height:1.5;">
+            ${isEn
+              ? 'To coordinate with seller.<br><a href="mailto:hola@mujercobra.cl" style="color:#c97a4b;text-decoration:none;">Contact us after purchase</a> to get a quote.'
+              : 'A coordinar con la vendedora.<br><a href="mailto:hola@mujercobra.cl" style="color:#c97a4b;text-decoration:none;">Contáctanos tras el pago</a> para cotizarlo.'}
           </span>
         </div>
         <div class="summary-row total">
