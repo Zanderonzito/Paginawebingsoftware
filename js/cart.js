@@ -346,8 +346,42 @@ async function procesarCheckout() {
   }
 }
 
+/* ── Manejar retorno desde MercadoPago ─────────────────────── */
+function handleMercadoPagoReturn() {
+  const params = new URLSearchParams(window.location.search);
+  const pago = params.get('pago');
+  if (!pago) return;
+
+  const isEn = window.MC?.lang === 'en';
+  const msgs = {
+    exitoso: {
+      icon: '✅',
+      text: isEn ? 'Payment approved! Your order is confirmed.' : '¡Pago aprobado! Tu pedido está confirmado.',
+    },
+    fallido: {
+      icon: '❌',
+      text: isEn ? 'Payment failed. Please try again.' : 'El pago falló. Por favor intenta de nuevo.',
+    },
+    pendiente: {
+      icon: '⏳',
+      text: isEn ? 'Payment pending. We will notify you when confirmed.' : 'Pago pendiente. Te notificaremos cuando se confirme.',
+    },
+  };
+
+  const msg = msgs[pago];
+  if (msg && window.MC) {
+    setTimeout(() => window.MC.showToast(msg.text, msg.icon), 500);
+  }
+
+  // Limpiar el parámetro de la URL sin recargar
+  const url = new URL(window.location);
+  url.searchParams.delete('pago');
+  window.history.replaceState({}, '', url);
+}
+
 /* ── Init ──────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
+  handleMercadoPagoReturn();
   renderCart();
 });
 

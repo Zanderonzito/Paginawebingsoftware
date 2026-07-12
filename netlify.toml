@@ -10,3 +10,8 @@
   from = "/api/upload-foto"
   to = "/.netlify/functions/upload-foto"
   status = 200
+
+[[redirects]]
+  from = "/api/crear-preferencia"
+  to = "/.netlify/functions/crear-preferencia"
+  status = 200
