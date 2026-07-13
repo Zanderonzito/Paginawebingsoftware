@@ -200,10 +200,12 @@ async function renderCart() {
           <span>${isEn ? 'Subtotal' : 'Subtotal'}</span>
           <span>${fmtCLP(subtotal)}</span>
         </div>
-        <div class="summary-row">
+        <div class="summary-row" style="align-items:flex-start;">
           <span>${isEn ? 'Shipping' : 'Envío'}</span>
-          <span style="font-size:0.78rem;color:rgba(245,237,224,0.5);font-style:italic;">
-            ${isEn ? 'To coordinate with seller' : 'A coordinar con la vendedora'}
+          <span style="font-size:0.78rem;color:rgba(245,237,224,0.5);font-style:italic;text-align:right;line-height:1.5;">
+            ${isEn
+              ? 'To coordinate with seller.<br><a href="mailto:hola@mujercobra.cl" style="color:#c97a4b;text-decoration:none;">Contact us after purchase</a> to get a quote.'
+              : 'A coordinar con la vendedora.<br><a href="mailto:hola@mujercobra.cl" style="color:#c97a4b;text-decoration:none;">Contáctanos tras el pago</a> para cotizarlo.'}
           </span>
         </div>
         <div class="summary-row total">
@@ -253,7 +255,7 @@ function mostrarModalCheckout(isEn) {
           style="background:#103b3c;border:1px solid rgba(201,122,75,0.3);color:#f3ece1;padding:12px 16px;font-size:0.9rem;width:100%;box-sizing:border-box;">
         <input id="co-email" type="email" placeholder="${isEn ? 'Email *' : 'Correo electrónico *'}" required
           style="background:#103b3c;border:1px solid rgba(201,122,75,0.3);color:#f3ece1;padding:12px 16px;font-size:0.9rem;width:100%;box-sizing:border-box;">
-        <input id="co-fono" type="tel" placeholder="${isEn ? 'Phone (optional)' : 'Teléfono (opcional)'}"
+        <input id="co-fono" type="tel" placeholder="${isEn ? 'Phone *' : 'Teléfono *'}" required
           style="background:#103b3c;border:1px solid rgba(201,122,75,0.3);color:#f3ece1;padding:12px 16px;font-size:0.9rem;width:100%;box-sizing:border-box;">
         <textarea id="co-notas" placeholder="${isEn ? 'Notes (optional)' : 'Notas (opcional)'}" rows="2"
           style="background:#103b3c;border:1px solid rgba(201,122,75,0.3);color:#f3ece1;padding:12px 16px;font-size:0.9rem;width:100%;box-sizing:border-box;resize:vertical;"></textarea>
@@ -275,8 +277,8 @@ async function procesarCheckout() {
   const errorEl = document.getElementById('co-error');
   const btn     = document.getElementById('co-btn');
 
-  if (!nombre || !email) {
-    if (errorEl) { errorEl.textContent = isEn ? 'Name and email are required.' : 'Nombre y correo son obligatorios.'; errorEl.style.display = 'block'; }
+  if (!nombre || !email || !fono) {
+    if (errorEl) { errorEl.textContent = isEn ? 'Name, email and phone are required.' : 'Nombre, correo y teléfono son obligatorios.'; errorEl.style.display = 'block'; }
     return;
   }
 
@@ -346,8 +348,42 @@ async function procesarCheckout() {
   }
 }
 
+/* ── Manejar retorno desde MercadoPago ─────────────────────── */
+function handleMercadoPagoReturn() {
+  const params = new URLSearchParams(window.location.search);
+  const pago = params.get('pago');
+  if (!pago) return;
+
+  const isEn = window.MC?.lang === 'en';
+  const msgs = {
+    exitoso: {
+      icon: '✅',
+      text: isEn ? 'Payment approved! Your order is confirmed.' : '¡Pago aprobado! Tu pedido está confirmado.',
+    },
+    fallido: {
+      icon: '❌',
+      text: isEn ? 'Payment failed. Please try again.' : 'El pago falló. Por favor intenta de nuevo.',
+    },
+    pendiente: {
+      icon: '⏳',
+      text: isEn ? 'Payment pending. We will notify you when confirmed.' : 'Pago pendiente. Te notificaremos cuando se confirme.',
+    },
+  };
+
+  const msg = msgs[pago];
+  if (msg && window.MC) {
+    setTimeout(() => window.MC.showToast(msg.text, msg.icon), 500);
+  }
+
+  // Limpiar el parámetro de la URL sin recargar
+  const url = new URL(window.location);
+  url.searchParams.delete('pago');
+  window.history.replaceState({}, '', url);
+}
+
 /* ── Init ──────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
+  handleMercadoPagoReturn();
   renderCart();
 });
 
