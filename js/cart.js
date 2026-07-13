@@ -255,7 +255,7 @@ function mostrarModalCheckout(isEn) {
           style="background:#103b3c;border:1px solid rgba(201,122,75,0.3);color:#f3ece1;padding:12px 16px;font-size:0.9rem;width:100%;box-sizing:border-box;">
         <input id="co-email" type="email" placeholder="${isEn ? 'Email *' : 'Correo electrónico *'}" required
           style="background:#103b3c;border:1px solid rgba(201,122,75,0.3);color:#f3ece1;padding:12px 16px;font-size:0.9rem;width:100%;box-sizing:border-box;">
-        <input id="co-fono" type="tel" placeholder="${isEn ? 'Phone (optional)' : 'Teléfono (opcional)'}"
+        <input id="co-fono" type="tel" placeholder="${isEn ? 'Phone *' : 'Teléfono *'}" required
           style="background:#103b3c;border:1px solid rgba(201,122,75,0.3);color:#f3ece1;padding:12px 16px;font-size:0.9rem;width:100%;box-sizing:border-box;">
         <textarea id="co-notas" placeholder="${isEn ? 'Notes (optional)' : 'Notas (opcional)'}" rows="2"
           style="background:#103b3c;border:1px solid rgba(201,122,75,0.3);color:#f3ece1;padding:12px 16px;font-size:0.9rem;width:100%;box-sizing:border-box;resize:vertical;"></textarea>
@@ -277,8 +277,8 @@ async function procesarCheckout() {
   const errorEl = document.getElementById('co-error');
   const btn     = document.getElementById('co-btn');
 
-  if (!nombre || !email) {
-    if (errorEl) { errorEl.textContent = isEn ? 'Name and email are required.' : 'Nombre y correo son obligatorios.'; errorEl.style.display = 'block'; }
+  if (!nombre || !email || !fono) {
+    if (errorEl) { errorEl.textContent = isEn ? 'Name, email and phone are required.' : 'Nombre, correo y teléfono son obligatorios.'; errorEl.style.display = 'block'; }
     return;
   }
 

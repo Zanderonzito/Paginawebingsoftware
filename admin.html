@@ -419,9 +419,9 @@
         <div class="table-wrap">
           <table>
             <thead>
-              <tr><th>Código</th><th>Cliente</th><th>Email</th><th>Total</th><th>Estado</th><th>Fecha</th><th>Acción</th></tr>
+              <tr><th>Código</th><th>Cliente</th><th>Teléfono</th><th>Productos</th><th>Total</th><th>Estado</th><th>Fecha</th><th>Cambiar estado</th></tr>
             </thead>
-            <tbody id="tabla-pedidos"><tr><td colspan="7" style="color:var(--ivory-dim);text-align:center;padding:20px;">Cargando…</td></tr></tbody>
+            <tbody id="tabla-pedidos"><tr><td colspan="8" style="color:var(--ivory-dim);text-align:center;padding:20px;">Cargando…</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -860,18 +860,32 @@ function renderTablaProductos() {
 function renderTablaPedidos() {
   const tbody = document.getElementById('tabla-pedidos');
   if (PEDIDOS.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="color:var(--ivory-dim);text-align:center;padding:20px;">Sin pedidos aún</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="color:var(--ivory-dim);text-align:center;padding:20px;">Sin pedidos aún</td></tr>';
     return;
   }
   tbody.innerHTML = PEDIDOS.map(p => {
     const fecha = new Date(p.creado_en).toLocaleDateString('es-CL');
+    const items = Array.isArray(p.items) ? p.items : [];
+    const resumenProductos = items.length > 0
+      ? items.map(i => `${i.nombre} ×${i.cantidad}`).join(', ')
+      : '—';
+    const fono = p.cliente_fono || '—';
     return `<tr>
-      <td style="font-family:var(--font-display);">${p.codigo || '—'}</td>
-      <td>${p.cliente_nombre}</td>
-      <td style="font-size:0.78rem;color:var(--ivory-dim);">${p.cliente_email}</td>
-      <td>$${Number(p.total).toLocaleString('es-CL')}</td>
+      <td style="font-family:var(--font-display);white-space:nowrap;">${p.codigo || '—'}</td>
+      <td>
+        <div>${p.cliente_nombre}</div>
+        <div style="font-size:0.75rem;color:var(--ivory-dim);">${p.cliente_email}</div>
+      </td>
+      <td style="white-space:nowrap;">
+        <a href="tel:${fono}" style="color:var(--copper);text-decoration:none;">${fono}</a>
+      </td>
+      <td style="font-size:0.8rem;max-width:220px;">
+        <div style="color:var(--ivory-dim);line-height:1.5;">${resumenProductos}</div>
+        ${items.length > 0 ? `<button onclick="verDetallePedido(${p.id})" style="background:none;border:none;color:var(--copper);font-size:0.72rem;cursor:pointer;padding:2px 0;letter-spacing:0.08em;">ver detalle ↗</button>` : ''}
+      </td>
+      <td style="white-space:nowrap;">$${Number(p.total).toLocaleString('es-CL')}</td>
       <td><span class="estado-badge estado-${p.estado}">${p.estado}</span></td>
-      <td style="font-size:0.78rem;color:var(--ivory-dim);">${fecha}</td>
+      <td style="font-size:0.78rem;color:var(--ivory-dim);white-space:nowrap;">${fecha}</td>
       <td>
         <select onchange="cambiarEstadoPedido(${p.id}, this.value)" style="background:var(--petrol);border:1px solid var(--border);color:var(--ivory);padding:5px 8px;font-size:0.75rem;cursor:pointer;">
           <option value="pendiente"   ${p.estado==='pendiente'   ?'selected':''}>Pendiente</option>
@@ -884,6 +898,73 @@ function renderTablaPedidos() {
       </td>
     </tr>`;
   }).join('');
+}
+
+/* ── MODAL DETALLE PEDIDO ── */
+function verDetallePedido(id) {
+  const p = PEDIDOS.find(x => x.id === id);
+  if (!p) return;
+  const items = Array.isArray(p.items) ? p.items : [];
+  const fecha = new Date(p.creado_en).toLocaleDateString('es-CL', { day:'2-digit', month:'long', year:'numeric' });
+  const total = Number(p.total).toLocaleString('es-CL');
+  const filas = items.map(i => `
+    <tr>
+      <td style="padding:10px 0;border-bottom:1px solid var(--ivory-faint);">${i.nombre}</td>
+      <td style="padding:10px 0;border-bottom:1px solid var(--ivory-faint);text-align:center;">${i.cantidad}</td>
+      <td style="padding:10px 0;border-bottom:1px solid var(--ivory-faint);text-align:right;">$${(i.precio_clp * i.cantidad).toLocaleString('es-CL')}</td>
+    </tr>`).join('');
+
+  const prev = document.getElementById('modal-detalle-pedido');
+  if (prev) prev.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'modal-detalle-pedido';
+  modal.className = 'modal-overlay open';
+  modal.innerHTML = `
+    <div class="modal-box" style="max-width:520px;">
+      <button class="modal-close" onclick="document.getElementById('modal-detalle-pedido').remove()">✕</button>
+      <div class="modal-title">Pedido <em style="color:var(--copper-bright);">${p.codigo || p.id}</em></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0 24px;font-size:0.85rem;">
+        <div>
+          <div style="font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--copper);margin-bottom:4px;">Cliente</div>
+          <div>${p.cliente_nombre}</div>
+        </div>
+        <div>
+          <div style="font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--copper);margin-bottom:4px;">Teléfono</div>
+          <div><a href="tel:${p.cliente_fono || ''}" style="color:var(--copper-bright);text-decoration:none;">${p.cliente_fono || '—'}</a></div>
+        </div>
+        <div>
+          <div style="font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--copper);margin-bottom:4px;">Email</div>
+          <div style="color:var(--ivory-dim);font-size:0.82rem;">${p.cliente_email}</div>
+        </div>
+        <div>
+          <div style="font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--copper);margin-bottom:4px;">Fecha</div>
+          <div style="color:var(--ivory-dim);font-size:0.82rem;">${fecha}</div>
+        </div>
+        ${p.cliente_notas ? `<div style="grid-column:1/-1;">
+          <div style="font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--copper);margin-bottom:4px;">Notas</div>
+          <div style="color:var(--ivory-dim);font-size:0.82rem;">${p.cliente_notas}</div>
+        </div>` : ''}
+      </div>
+      <table style="width:100%;border-collapse:collapse;">
+        <thead>
+          <tr style="font-size:0.68rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--copper);">
+            <th style="text-align:left;padding-bottom:8px;border-bottom:1px solid var(--border);">Producto</th>
+            <th style="text-align:center;padding-bottom:8px;border-bottom:1px solid var(--border);">Cant.</th>
+            <th style="text-align:right;padding-bottom:8px;border-bottom:1px solid var(--border);">Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>${filas}</tbody>
+      </table>
+      <div style="text-align:right;margin-top:16px;font-family:var(--font-display);font-size:1.3rem;">
+        Total: <span style="color:var(--copper-bright);">$${total} CLP</span>
+      </div>
+      <div style="margin-top:20px;padding:14px 16px;background:var(--petrol);border-left:3px solid var(--copper);font-size:0.82rem;color:var(--ivory-dim);">
+        Estado actual: <span class="estado-badge estado-${p.estado}" style="margin-left:6px;">${p.estado}</span>
+      </div>
+    </div>`;
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  document.body.appendChild(modal);
 }
 
 function renderPedidosResumen() {
